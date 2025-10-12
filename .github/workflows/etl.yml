@@ -1,51 +1,67 @@
-name: ETL (Eurostat TEINA230)
+name: ETL and publish data
 
 on:
   workflow_dispatch:
   schedule:
+    # Dagelijks 06:00 NL-tijd (≈ 04:00 UTC in zomer; 05:00 in winter)
     - cron: "0 4 * * *"
+
+permissions:
+  contents: write  # <- nodig om te kunnen pushen
 
 jobs:
   run-etl:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repo
+      - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # nodig voor nette commits/pushes
 
-      - name: Show repo tree (debug)
-        run: |
-          pwd
-          ls -la
-          echo "---"
-          ls -la etl || true
-
-      - name: Set up Python 3.12 (no caching)
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Install deps
+      - name: Install dependencies
         run: |
-          if [ -f etl/requirements.txt ]; then pip install -r etl/requirements.txt; fi
+          python -m pip install --upgrade pip
+          pip install requests
 
-      - name: Run Eurostat TEINA230 ETL
-        run: python etl/teina230.py
+      - name: Run ETL (Eurostat TEINA230)
+        run: python etl/eurostat_teina230.py
 
-      - name: List generated files
+      # Optioneel: bekijk even wat er veranderd is
+      - name: Show git status
         run: |
-          echo "Generated files under data/:"
-          find data -type f -maxdepth 3 -print
+          git status
+          git diff --stat || true
 
-      - name: Upload artifact (for download)
+      - name: Commit generated data (if changed)
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Voeg alleen de data-map toe
+          git add -A data/
+
+          # Commit alleen als er staged changes zijn
+          if git diff --cached --quiet; then
+            echo "No data changes to commit."
+            exit 0
+          fi
+
+          git commit -m "chore(data): update Eurostat TEINA230 outputs"
+          git push
+
+      # Altijd handig: upload ook als artifact om direct te downloaden
+      - name: Upload data artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: teina230-output
+          name: eurostat-teina230-data
           path: |
             data/latest/eu_debt.json
             data/latest/manifest.json
-            
-      - name: Upload results
-        uses: actions/upload-artifact@v4
-        with:
-          name: eurostat-data
-          path: data/
+            data/timeseries/eu_debt_12q.json
+            data/snapshots/**/eu_debt.json

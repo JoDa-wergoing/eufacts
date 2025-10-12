@@ -1,9 +1,9 @@
-name: ETL (minimal)
+name: ETL (Eurostat TEINA230)
 
 on:
-  workflow_dispatch:      # handmatig starten
+  workflow_dispatch:
   schedule:
-    - cron: "0 4 * * *"   # dagelijks 04:00 UTC
+    - cron: "0 4 * * *"
 
 jobs:
   run-etl:
@@ -24,16 +24,22 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Run ETL script
-        run: python etl/hello_etl.py
+      - name: Install deps
+        run: |
+          if [ -f etl/requirements.txt ]; then pip install -r etl/requirements.txt; fi
+
+      - name: Run Eurostat TEINA230 ETL
+        run: python etl/eurostat_teina230.py
 
       - name: List generated files
         run: |
-          echo "Generated files:"
-          ls -la data/latest
+          echo "Generated files under data/:"
+          find data -type f -maxdepth 3 -print
 
       - name: Upload artifact (for download)
         uses: actions/upload-artifact@v4
         with:
-          name: data-output
-          path: data/latest/hello.json
+          name: teina230-output
+          path: |
+            data/latest/eu_debt.json
+            data/latest/manifest.json

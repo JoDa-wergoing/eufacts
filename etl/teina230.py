@@ -13,31 +13,33 @@ Functies:
   - data/latest/manifest.json               (metadata + hashes)
 """
 
-import os
 import sys
 import json
 import hashlib
 import logging
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Tuple
+from pathlib import Path
+
 import requests
 
 # ---------- Config ----------
 DATASET_ID = "teina230"  # General government gross debt - quarterly
 BASE_URL = "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data"
-# We halen bewust 12 kwartalen en reduceren vervolgens naar het laatste kwartaal.
 EUROSTAT_URL = f"{BASE_URL}/{DATASET_ID}?lastTimePeriod=12"
-
-OUT_DIR = "data"
-LATEST_DIR = os.path.join(OUT_DIR, "latest")
-SNAP_DIR = os.path.join(OUT_DIR, "snapshots")
-TS_DIR = os.path.join(OUT_DIR, "timeseries")
-
-JSON_LATEST = os.path.join(LATEST_DIR, "eu_debt.json")
-JSON_TS = os.path.join(TS_DIR, "eu_debt_12q.json")
-MANIFEST_OUT = os.path.join(LATEST_DIR, "manifest.json")
-
 TIMEOUT_S = 60
+
+# --- PADEN ROBUUST MAKEN ---
+SCRIPT_DIR = Path(__file__).resolve().parent
+REPO_ROOT = SCRIPT_DIR.parent  # <repo> (ouder van etl/)
+OUT_DIR = REPO_ROOT / "data"
+LATEST_DIR = OUT_DIR / "latest"
+SNAP_DIR = OUT_DIR / "snapshots"
+TS_DIR = OUT_DIR / "timeseries"
+
+JSON_LATEST = LATEST_DIR / "eu_debt.json"
+JSON_TS = TS_DIR / "eu_debt_12q.json"
+MANIFEST_OUT = LATEST_DIR / "manifest.json"
 
 # ---------- Logging ----------
 logging.basicConfig(
@@ -47,17 +49,12 @@ logging.basicConfig(
 log = logging.getLogger("etl.teina230")
 
 # ---------- Helpers ----------
-def sha256_file(path: str) -> str:
+def sha256_file(path: Path) -> str:
     h = hashlib.sha256()
-    with open(path, "rb") as f:
+    with path.open("rb") as f:
         for chunk in iter(lambda: f.read(8192), b""):
             h.update(chunk)
     return "sha256:" + h.hexdigest()
-
-def ensure_dirs():
-    os.makedirs(LATEST_DIR, exist_ok=True)
-    os.makedirs(SNAP_DIR, exist_ok=True)
-    os.makedirs(TS_DIR, exist_ok=True)
 
 def fetch_json(url: str) -> Dict[str, Any]:
     log.info("Fetching Eurostat JSON: %s", url)
@@ -66,10 +63,7 @@ def fetch_json(url: str) -> Dict[str, Any]:
     return r.json()
 
 def _linear_index_to_coords(idx: int, dims_sizes: List[int]) -> List[int]:
-    """
-    Zet lineaire index om naar coördinaten per dimensie (row-major).
-    Eurostat JSON 'value' dict gebruikt lineaire indices.
-    """
+    """Zet lineaire index om naar coördinaten per dimensie (row-major)."""
     coords = []
     for size in reversed(dims_sizes):
         coords.append(idx % size)
@@ -118,17 +112,18 @@ def _choose_pct_unit(records: List[Dict[str, Any]]) -> str:
     # 3) fallback: enige unit
     if len(units_present) == 1:
         return units_present[0]
-    # 4) laatste fallback: None -> caller moet hiermee omgaan
+    # 4) laatste fallback
     return None
 
-def parse_latest_and_timeseries(cube: Dict[str, Any]) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
+def parse_latest_and_timeseries(cube: Dict[str, Any]) -> Tuple[List[Dict[str, Any]], Dict[str, Any], Dict[str, Any]]:
     """
     Parse de kubus:
     - 'latest' records: enkel meest recente kwartaal (per geo, 1 unit)
     - 'timeseries' per geo: alle kwartalen beschikbaar (12), zelfde unit-filter
 
     Return:
-        latest_output (dict voor schrijven),
+        latest_records (list),
+        series_by_geo (dict),
         meta (dict met o.a. gekozen unit & laatste periode)
     """
     value_map: Dict[str, float] = cube.get("value", {})
@@ -144,7 +139,7 @@ def parse_latest_and_timeseries(cube: Dict[str, Any]) -> Tuple[List[Dict[str, An
     latest_time_code = dim_meta["time"]["inv_index"][latest_time_pos]
     latest_time_label = dim_meta["time"]["labels"].get(latest_time_code, latest_time_code)
 
-    # Verzamel alle records (alle kwartalen), we filteren later op unit en op laatste kwartaal.
+    # Verzamel alle records (alle kwartalen)
     all_records: List[Dict[str, Any]] = []
     for k, v in value_map.items():
         lin_idx = int(k)
@@ -185,9 +180,7 @@ def parse_latest_and_timeseries(cube: Dict[str, Any]) -> Tuple[List[Dict[str, An
         })
 
     # ---- Timeseries (12 kwartalen per land) ----
-    # Structureer per geo_code een lijst met {time, value}
     series_by_geo: Dict[str, Dict[str, Any]] = {}
-    # sorteer op time_pos zodat de tijdreeks netjes oploopt
     all_records_sorted = sorted(all_records, key=lambda x: (x["geo_code"], x["time_pos"]))
     for r in all_records_sorted:
         geo = r["geo_code"]
@@ -205,7 +198,6 @@ def parse_latest_and_timeseries(cube: Dict[str, Any]) -> Tuple[List[Dict[str, An
             "value_pct_gdp": r["value"],
         })
 
-    # Meta
     units_present = sorted({r.get("unit_code") for r in all_records if r.get("unit_code")})
     meta = {
         "dim_ids": dim_ids,
@@ -249,15 +241,12 @@ def build_timeseries_object(series_by_geo: Dict[str, Any], source_url: str, data
         ],
     }
 
-def write_json(path: str, obj: Dict[str, Any]):
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(obj, f, indent=2, ensure_ascii=False)
-    log.info("Wrote %s (%d bytes)", path, os.path.getsize(path))
+def write_json(path: Path, obj: Dict[str, Any]):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(obj, indent=2, ensure_ascii=False), encoding="utf-8")
+    log.info("Wrote %s (%d bytes)", path, path.stat().st_size)
 
 def main():
-    ensure_dirs()
-
     # 1) Fetch
     try:
         cube = fetch_json(EUROSTAT_URL)
@@ -286,23 +275,23 @@ def main():
     latest_obj = build_latest_object(latest_records, EUROSTAT_URL, DATASET_ID, meta)
     ts_obj = build_timeseries_object(series_by_geo, EUROSTAT_URL, DATASET_ID, meta)
 
-    # 4) Write latest + timeseries
+    # 4) Write latest + timeseries (altijd onder <repo>/data)
     write_json(JSON_LATEST, latest_obj)
     write_json(JSON_TS, ts_obj)
 
     # 5) Snapshot (latest)
     today = datetime.now(timezone.utc).date().isoformat()
-    snap_dir = os.path.join(SNAP_DIR, today)
-    os.makedirs(snap_dir, exist_ok=True)
-    snap_path = os.path.join(snap_dir, "eu_debt.json")
+    snap_dir = SNAP_DIR / today
+    snap_dir.mkdir(parents=True, exist_ok=True)
+    snap_path = snap_dir / "eu_debt.json"
     write_json(snap_path, latest_obj)
 
     # 6) Manifest
     manifest = {
         "dataset": DATASET_ID.upper(),
-        "latest_file": os.path.relpath(JSON_LATEST, start=OUT_DIR),
-        "timeseries_file": os.path.relpath(JSON_TS, start=OUT_DIR),
-        "snapshot_file": os.path.relpath(snap_path, start=OUT_DIR),
+        "latest_file": str(JSON_LATEST.relative_to(OUT_DIR)),
+        "timeseries_file": str(JSON_TS.relative_to(OUT_DIR)),
+        "snapshot_file": str(snap_path.relative_to(OUT_DIR)),
         "source_url": EUROSTAT_URL,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "record_count_latest": len(latest_obj["records"]),
@@ -334,7 +323,6 @@ def main():
     }
     write_json(MANIFEST_OUT, manifest)
     log.info("Manifest written to %s", MANIFEST_OUT)
-
     log.info("Done.")
 
 if __name__ == "__main__":

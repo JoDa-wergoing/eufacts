@@ -29,7 +29,7 @@ jobs:
           if [ -f etl/requirements.txt ]; then pip install -r etl/requirements.txt; fi
 
       - name: Run Eurostat TEINA230 ETL
-        run: python etl/eurostat_teina230.py
+        run: python etl/teina230.py
 
       - name: List generated files
         run: |
@@ -43,3 +43,9 @@ jobs:
           path: |
             data/latest/eu_debt.json
             data/latest/manifest.json
+            
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: eurostat-data
+          path: data/

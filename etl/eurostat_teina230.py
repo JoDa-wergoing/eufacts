@@ -21,10 +21,11 @@ import requests
 
 # ---------- Config ----------
 DATASET_ID = "teina230"  # Eurostat: General government gross debt - quarterly
-# We willen de laatste kwartaalperiode; de 1.0 API ondersteunt 'time=Q' + 'lastTimePeriod=1'
+# We willen de laatste 12 kwartaalperioden
+
 EUROSTAT_URL = (
     f"https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/"
-    f"{DATASET_ID}?time=Q&lastTimePeriod=1"
+    f"{DATASET_ID}?lastTimePeriod=12"
 )
 
 OUT_DIR = "data"

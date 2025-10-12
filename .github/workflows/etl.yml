@@ -2,8 +2,8 @@ name: ETL and (optionally) publish
 
 on:
   schedule:
-    - cron: "0 4 * * *"     # Dagelijks 04:00 UTC (= 06:00 NL zomertijd / 05:00 wintertijd)
-  workflow_dispatch:        # Handmatig starten via de UI
+    - cron: "0 4 * * *"
+  workflow_dispatch:
 
 jobs:
   run-etl:
@@ -16,7 +16,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: "pip"
 
       - name: Install deps (optional)
         run: |
@@ -25,7 +24,7 @@ jobs:
       - name: Run ETL
         run: python etl/hello_etl.py
 
-      # --- Publiceren naar object storage (S3/R2) - optioneel, zie stap 2 ---
+      # --- Publiceren naar object storage (S3/R2) - optioneel ---
       # - name: Publish to object storage
       #   run: |
       #     aws s3 sync data/ s3://eufacts-data/ \
@@ -35,7 +34,7 @@ jobs:
       #     AWS_ACCESS_KEY_ID: ${{ secrets.OBJ_KEY_ID }}
       #     AWS_SECRET_ACCESS_KEY: ${{ secrets.OBJ_SECRET }}
 
-      - name: Store build artifact (voor test)
+      - name: Store build artifact (test)
         uses: actions/upload-artifact@v4
         with:
           name: data-output

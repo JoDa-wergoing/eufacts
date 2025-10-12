@@ -16,26 +16,16 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            etl/requirements.txt
+            etl/pyproject.toml
 
-      - name: Install deps (optional)
+      - name: Install deps (if present)
         run: |
+          python -m pip install --upgrade pip
           if [ -f etl/requirements.txt ]; then pip install -r etl/requirements.txt; fi
+          if [ -f etl/pyproject.toml ]; then pip install .; fi
 
       - name: Run ETL
         run: python etl/hello_etl.py
-
-      # --- Publiceren naar object storage (S3/R2) - optioneel ---
-      # - name: Publish to object storage
-      #   run: |
-      #     aws s3 sync data/ s3://eufacts-data/ \
-      #       --endpoint-url "${{ secrets.OBJ_ENDPOINT }}" \
-      #       --acl public-read
-      #   env:
-      #     AWS_ACCESS_KEY_ID: ${{ secrets.OBJ_KEY_ID }}
-      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.OBJ_SECRET }}
-
-      - name: Store build artifact (test)
-        uses: actions/upload-artifact@v4
-        with:
-          name: data-output
-          path: data/latest/hello.json

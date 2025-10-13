@@ -29,51 +29,51 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Prepare site folder (preserve HTML + copy data + build latest aliases)
-      shell: bash
-      run: |
-        set -euxo pipefail
+        shell: bash
+        run: |
+          set -euxo pipefail
 
-        # 1) HTML aanwezig
-        test -d site || (echo "site/ ontbreekt" && exit 1)
-        test -f site/index.html || (echo "site/index.html ontbreekt" && exit 1)
+          # 1) Vereist: site/ met index.html
+          test -d site || (echo "site/ ontbreekt" && exit 1)
+          test -f site/index.html || (echo "site/index.html ontbreekt" && exit 1)
 
-        # 2) Kopieer complete data/ boom naar publicatiemap
-        mkdir -p site/data
-        rsync -a --delete data/ site/data/ || true
+          # 2) Kopieer data/ naar publicatiemap
+          mkdir -p site/data
+          rsync -a --delete data/ site/data/ || true
 
-        # 3) 'latest' aliassen voor ALLE datasets in snapshots/
-        mkdir -p site/data/latest
-        if [ -d data/snapshots ]; then
-          # unieke basenamen (zonder .json)
-          IFS=$'\n' read -r -d '' -a DATASETS < <(find data/snapshots -type f -name '*.json' -printf '%f\n' | sed 's/\.json$//' | sort -u && printf '\0') || true
-          for ds in "${DATASETS[@]}"; do
-            latest_json="$(ls -t data/snapshots/*/${ds}.json 2>/dev/null | head -n1 || true)"
-            if [ -n "${latest_json}" ]; then
-            # normaliseer underscores naar koppeltekens om consistente front-end urls te hebben
-              ds_norm="$(echo "${ds}" | sed 's/_/-/g')"
-              cp "${latest_json}" "site/data/latest/${ds_norm}.json"
-              echo "Aliased ${latest_json} -> site/data/latest/${ds_norm}.json"
-            fi
-          done
-        fi
+          # 3) 'latest' aliassen voor ALLE datasets in snapshots/ (pak de nieuwste)
+          mkdir -p site/data/latest
+          if [ -d data/snapshots ]; then
+            mapfile -t SNAP_JSONS < <(ls -1t data/snapshots/*/*.json 2>/dev/null || true)
+            declare -A seen=()
+            for f in "${SNAP_JSONS[@]}"; do
+              base="${f##*/}"                      # bv. teina230.json
+              base_norm="${base//_/-}"             # underscores -> koppeltekens
+              if [[ -z "${seen[$base]}" ]]; then   # eerste (nieuwste) wint
+                cp "$f" "site/data/latest/$base_norm"
+                echo "Aliased $f -> site/data/latest/$base_norm"
+                seen[$base]=1
+              fi
+            done
+          fi
 
-        # 4) 'latest' aliassen voor timeseries/ (neemt bestanden zoals teina230_timeseries.json óf teina230-timeseries.json)
-        if [ -d data/timeseries ]; then
-          shopt -s nullglob
-          for f in data/timeseries/*.json; do
-            base="$(basename "$f" .json)"
-            base_norm="$(echo "${base}" | sed 's/_/-/g')"
-            cp "$f" "site/data/latest/${base_norm}.json"
-            echo "Aliased $f -> site/data/latest/${base_norm}.json"
-          done
-          shopt -u nullglob
-        fi
+          # 4) 'latest' aliassen voor timeseries/ (alle JSONs)
+          if [ -d data/timeseries ]; then
+            shopt -s nullglob
+            for f in data/timeseries/*.json; do
+              base="${f##*/}"
+              base_norm="${base//_/-}"
+              cp "$f" "site/data/latest/$base_norm"
+              echo "Aliased $f -> site/data/latest/$base_norm"
+            done
+            shopt -u nullglob
+          fi
 
-        # 5) Diagnose (handig bij 404’s)
-        echo "::group::Listing site/data/latest"
-        ls -al site/data/latest || true
-        echo "::endgroup::"
-       
+          # 5) Diagnose
+          echo "::group::Listing site/data/latest"
+          ls -al site/data/latest || true
+          echo "::endgroup::"
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

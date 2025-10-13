@@ -31,7 +31,7 @@ jobs:
       - name: Prepare site folder (preserve HTML + copy data + build latest aliases)
         shell: bash
         run: |
-          set -euxo pipefail
+          set -Eeuo pipefail
 
           # 1) Vereist: site/ met index.html
           test -d site || (echo "site/ ontbreekt" && exit 1)
@@ -41,18 +41,23 @@ jobs:
           mkdir -p site/data
           rsync -a --delete data/ site/data/ || true
 
-          # 3) 'latest' aliassen voor ALLE datasets in snapshots/ (pak de nieuwste)
+          # 3) 'latest' aliassen voor ALLE datasets in snapshots/ (pak de nieuwste per bestandsnaam)
           mkdir -p site/data/latest
           if [ -d data/snapshots ]; then
             mapfile -t SNAP_JSONS < <(ls -1t data/snapshots/*/*.json 2>/dev/null || true)
+
+            # Associatieve array voor de-dedupe (eerste = nieuwste wint)
             declare -A seen=()
+
             for f in "${SNAP_JSONS[@]}"; do
-              base="${f##*/}"                      # bv. teina230.json
-              base_norm="${base//_/-}"             # underscores -> koppeltekens
-              if [[ -z "${seen[$base]}" ]]; then   # eerste (nieuwste) wint
+              base="${f##*/}"            # bv. teina230.json
+              base_norm="${base//_/-}"   # underscores -> koppeltekens
+
+              # set -u safe: check of key al bestaat
+              if [[ -z "${seen[$base]+x}" ]]; then
                 cp "$f" "site/data/latest/$base_norm"
                 echo "Aliased $f -> site/data/latest/$base_norm"
-                seen[$base]=1
+                seen["$base"]=1
               fi
             done
           fi

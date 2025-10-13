@@ -1,11 +1,11 @@
-<!-- FILE: site/index.html (v3.3) -->
+<!-- FILE: index.html (v3.4) -->
 <!doctype html>
 <html lang="nl">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Eufacts • TEINA230 — Visual MVP (v3.3)</title>
-  <meta name="description" content="Eufacts viewer — zero‑baseline charts by default, volledige landennamen, duidelijke titels/ondertitels, EA/EU glossary." />
+  <title>Eufacts • TEINA230 — Visual</title>
+  <meta name="description" content="Eufacts viewer — volledige landennamen, duidelijke titels/ondertitels, EA/EU glossary, zero‑baseline." />
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script defer src="./app.js"></script>
@@ -38,8 +38,8 @@
 <body>
   <header>
     <div class="wrap">
-      <h1>Eufacts — <span class="badge">TEINA230</span> Visual MVP (v3.3)</h1>
-      <div class="sub">Zero‑baseline als standaard. Één periode ⇒ landenranglijst (bar). Meerdere periodes ⇒ tijdreeks. Volledige landennamen + uitleg van EA/EU labels onderaan.</div>
+      <h1>Eufacts — <span class="badge">TEINA230</span> Visual</h1>
+      <div class="sub">Één periode ⇒ landenranglijst (bar). Meerdere periodes ⇒ tijdreeks. Zero‑baseline. Volledige landennamen + uitleg van EA/EU labels onderaan.</div>
     </div>
   </header>
 
@@ -74,7 +74,7 @@
       <div id="glossary" class="gloss"></div>
     </section>
 
-    <p class="foot">Publiceer als <code>site/index.html</code>. Plaats <code>site/app.js</code> ernaast. Gebruik desgewenst <code>?data=./pad/naar.json</code>.</p>
+    <p class="foot">Publiceer als <code>index.html</code> (of in <code>site/</code>). Zet GitHub Pages aan. Default dataset: <code>./data/latest/teina230.json</code>. Timeseries kan via <code>?data=./data/latest/teina230-timeseries.json</code> (of underscore-variant).</p>
 
     <div id="msg" class="foot"></div>
   </main>

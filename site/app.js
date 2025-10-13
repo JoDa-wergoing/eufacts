@@ -1,9 +1,6 @@
-<!-- FILE: site/app.js (v3.3) -->
+<!-- FILE: app.js (v3.4) -->
 // ---- Project defaults ----
-// Zero-baseline charts as team policy
 const Y_BASELINE = { beginAtZero: true, suggestedMin: 0 };
-
-// Data param / default
 const DEFAULT_DATA = new URLSearchParams(location.search).get('data') || './data/latest/teina230.json';
 
 const el = (id) => document.getElementById(id);
@@ -96,7 +93,7 @@ function detectKeys(rows){
   return { timeKey, countryKey, numericKeys: numericKeys.filter(k=>k!==timeKey && k!==countryKey), preferredExisting };
 }
 
-// Time parsing
+// Time parsing (supports YYYY, YYYY-MM, YYYY-Qn, YYYYMn, YYYYMM)
 function parseTime(v){
   if (v==null) return null; const s = String(v).trim(); let m;
   m = s.match(/^(\d{4})-?Q([1-4])$/) || s.match(/^Q([1-4])-(\d{4})$/); if (m) { const year = m[2]?m[2]:m[1]; const q = m[2]?m[1]:m[2]; const month = (Number(q)-1)*3 + 1; return new Date(`${year}-${String(month).padStart(2,'0')}-01T00:00:00Z`); }
@@ -224,7 +221,7 @@ async function load(url){
     seriesKeySelect.innerHTML = numericKeys.map(k=>`<option value="${k}" ${k===defaultValueKey?'selected':''}>${k}</option>`).join('');
     const valueKey = seriesKeySelect.value || defaultValueKey;
 
-    const times = new Set(rows.map(r => timeKey ? String(r[timeKey]) : '')); const uniqueTimes = [...times].filter(Boolean);
+    const { uniqueTimes } = summarizeShape(rows, timeKey, countryKey);
 
     if (timeKey && uniqueTimes.length === 1 && countryKey) {
       // Single period ⇒ landenranglijst (bar)
@@ -244,7 +241,6 @@ async function load(url){
         await ensureTimeAdapter();
         renderLineChart(pts, valueKey);
         renderTableFromPoints(pts);
-        // Glossary voor gekozen geo (als aggregate)
         if (AGG_EXPLAIN[chosenGeo]) { glossWrap.innerHTML = `<strong>Labelverklaring:</strong><ul><li><code>${chosenGeo}</code> — ${AGG_EXPLAIN[chosenGeo]}</li></ul>`; } else { glossWrap.innerHTML = ''; }
         meta.innerHTML = `Bron: <code>${url}</code><br>Records: <b>${rows.length}</b> · Geo: <b>${chosenGeo||'n/a'}</b> · Waarde: <code>${valueKey}</code>`;
         setMessage('');

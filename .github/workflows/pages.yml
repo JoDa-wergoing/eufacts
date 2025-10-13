@@ -27,21 +27,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      # Kopieer data/ mee naar de site build, zodat /data/latest/... werkt
       - name: Prepare site folder
+        shell: bash
         run: |
           set -euxo pipefail
           test -d site || (echo "site/ ontbreekt" && exit 1)
           mkdir -p site/data
+          # Kopieer data mee; als data/ (nog) niet bestaat, ga gewoon door
           rsync -a --delete data/ site/data/ || true
-          # Optioneel: maak een eenvoudige index als hij ontbreekt
+
+          # Maak een simpele index als er nog geen index.html is
           if [ ! -f site/index.html ]; then
-            cat > site/index.html <<'HTML'
-            <!doctype html><meta charset="utf-8">
-            <title>Eufacts</title><h1>Eufacts</h1>
-            <p>Upload hier je eigen index.html in <code>site/</code>.</p>
-            HTML
+            printf '%s\n' '<!doctype html><meta charset="utf-8"><title>Eufacts</title><h1>Eufacts</h1><p>Upload hier je eigen index.html in <code>site/</code>.</p>' > site/index.html
           fi
 
       - name: Upload artifact

@@ -60,7 +60,16 @@ jobs:
           else
             echo "Geen data/snapshots map — sla latest-alias stap over."
           fi
-
+          # 3b) Bouw ook 'latest' aliassen voor alle timeseries-bestanden
+          mkdir -p site/data/latest
+          if [ -d data/timeseries ]; then
+            for f in data/timeseries/*.json; do
+              [ -e "$f" ] || continue
+              base="$(basename "$f")"            # bv. teina230_timeseries.json
+              cp "$f" "site/data/latest/$base"   # -> site/data/latest/teina230_timeseries.json
+              echo "Aliased $f -> site/data/latest/$base"
+            done
+          fi
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

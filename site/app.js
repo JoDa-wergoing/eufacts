@@ -1,4 +1,4 @@
-<!-- FILE: site/app.js (v3) -->
+<!-- FILE: site/app.js (v3.1) -->
 // ---- Config ----
 const DEFAULT_DATA = new URLSearchParams(location.search).get('data') || './data/latest/teina230.json';
 
@@ -8,6 +8,7 @@ const seriesKeySelect = el('seriesKey');
 const msg = el('msg');
 const meta = el('meta');
 const tableWrap = el('tableWrap');
+const glossWrap = el('glossary');
 let CHART;
 
 function setMessage(text, kind='info'){
@@ -37,7 +38,7 @@ function tryParse(text){
   catch(e){ return { kind:'csv', rows: parseCSV(text) }; }
 }
 
-// Eurostat SDMX flatten (very light)
+// Eurostat SDMX flatten (light)
 function sdmxToRows(sdmx){
   if (!sdmx || !sdmx.structure || !Array.isArray(sdmx.dataSets)) return null;
   const ds = sdmx.dataSets[0] || {};
@@ -45,15 +46,11 @@ function sdmxToRows(sdmx){
   const dimsTime = sdmx.structure?.dimensions?.time || [];
   const timeDim = dimsObs.find(d=>/time/i.test(d.id)) || dimsTime[0];
   const timeLabels = timeDim?.values || [];
-  const toTime = (idx)=>{
-    const v = timeLabels[idx];
-    return v?.name ?? v?.label ?? v ?? idx;
-  };
+  const toTime = (idx)=>{ const v = timeLabels[idx]; return v?.name ?? v?.label ?? v ?? idx; };
   const out = [];
   if (ds.observations) {
     Object.entries(ds.observations).forEach(([key, arr])=>{
-      const parts = key.split(':');
-      const tIdx = Number(parts[parts.length-1]);
+      const tIdx = Number(key.split(':').pop());
       const time = toTime(tIdx);
       const value = Array.isArray(arr) ? arr[0] : arr;
       if (time!==undefined && value!=null) out.push({ time, value:Number(value) });
@@ -74,34 +71,32 @@ function sdmxToRows(sdmx){
 function objectJsonToRows(obj){
   if (Array.isArray(obj)) return obj;
   if (Array.isArray(obj?.records)) return obj.records;
-  for (const k of ['data','rows','items','result']) {
-    if (Array.isArray(obj?.[k])) return obj[k];
-  }
-  const sdmx = sdmxToRows(obj);
-  if (sdmx) return sdmx;
-  return null;
+  for (const k of ['data','rows','items','result']) { if (Array.isArray(obj?.[k])) return obj[k]; }
+  const sdmx = sdmxToRows(obj); if (sdmx) return sdmx; return null;
+}
+
+// Prefer full country names; fallback to codes or geo
+function labelForRow(r){
+  return r.country ?? r.country_name ?? r.name ?? r.geo_label ?? r.country_code ?? r.geo ?? '?';
 }
 
 function detectKeys(rows){
-  if(!rows.length) return { timeKey:null, countryKey:null, numericKeys:[] };
+  if(!rows.length) return { timeKey:null, countryKey:null, numericKeys:[], preferredExisting:[] };
   const sample = rows[0];
   const keys = Object.keys(sample);
   const timeKey = keys.find(k=> ['time','TIME_PERIOD','date','period','year'].includes(k)) || keys.find(k=>/time|period|date|year/i.test(k));
-  const countryKey = keys.find(k=> ['country','geo','country_code','GEO'].includes(k)) || keys.find(k=>/country|geo/i.test(k));
+  const countryKey = keys.find(k=> ['country','country_name','name','geo_label','country_code','geo','GEO'].includes(k)) || keys.find(k=>/country|geo/i.test(k));
   const numericKeys = keys.filter(k=> rows.some(r=> !isNaN(parseFloat(String(r[k]).replace(',','.'))) ));
-  // Prefer common value names
   const preferred = ['value_pct_gdp','value','OBS_VALUE'];
   const preferredExisting = preferred.filter(k => numericKeys.includes(k));
   return { timeKey, countryKey, numericKeys: numericKeys.filter(k=>k!==timeKey && k!==countryKey), preferredExisting };
 }
 
-// Parse many time formats
 function parseTime(v){
   if (v==null) return null; const s = String(v).trim(); let m;
-  m = s.match(/^(\d{4})-(\d{1,2})$/); if (m) return new Date(`${m[1]}-${String(m[2]).padStart(2,'0')}-01T00:00:00Z`);
-  m = s.match(/^(\d{4})[-\/.](\d{1,2})(?:[-\/.](\d{1,2}))?$/); if (m) return new Date(`${m[1]}-${String(m[2]).padStart(2,'0')}-${String(m[3]||'01').padStart(2,'0')}T00:00:00Z`);
-  m = s.match(/^(\d{4})$/); if (m) return new Date(`${m[1]}-01-01T00:00:00Z`);
   m = s.match(/^(\d{4})-?Q([1-4])$/) || s.match(/^Q([1-4])-(\d{4})$/); if (m) { const year = m[2]?m[2]:m[1]; const q = m[2]?m[1]:m[2]; const month = (Number(q)-1)*3 + 1; return new Date(`${year}-${String(month).padStart(2,'0')}-01T00:00:00Z`); }
+  m = s.match(/^(\d{4})-(\d{1,2})$/); if (m) return new Date(`${m[1]}-${String(m[2]).padStart(2,'0')}-01T00:00:00Z`);
+  m = s.match(/^(\d{4})$/); if (m) return new Date(`${m[1]}-01-01T00:00:00Z`);
   m = s.match(/^(\d{4})M(\d{1,2})$/); if (m) return new Date(`${m[1]}-${String(m[2]).padStart(2,'0')}-01T00:00:00Z`);
   m = s.match(/^(\d{4})(\d{2})$/); if (m) return new Date(`${m[1]}-${m[2]}-01T00:00:00Z`);
   const d = new Date(s); return isNaN(d) ? null : d;
@@ -115,18 +110,24 @@ function summarizeShape(rows, timeKey, countryKey){
   return { uniqueTimes: [...times], uniqueGeos: [...geos] };
 }
 
+// Aggregate labels → explanations
+const AGG_EXPLAIN = {
+  'EA20': 'Euro area — 20 landen (sinds 2023).',
+  'EA19': 'Euro area — 19 landen (t/m 2022).',
+  'EU27_2020': 'Europese Unie — 27 landen (sinds 2020).',
+  'EU28': 'Europese Unie — 28 landen (t/m 2020).',
+  'EU27': 'Europese Unie — 27 landen.'
+};
+
 function buildBarData(rows, countryKey, valueKey){
-  // Sort desc by value; label by country or code
-  const items = rows.map(r=>({ label: r[countryKey] ?? r.country_code ?? r.geo ?? '?', y: toNum(r[valueKey]) }))
+  const items = rows.map(r=>({ label: labelForRow(r), code: r.country_code || r.geo || null, y: toNum(r[valueKey]) }))
                    .filter(p=> !isNaN(p.y));
   items.sort((a,b)=> b.y - a.y);
   return items;
 }
 
 function buildTimeSeries(rows, timeKey, valueKey, countryKey){
-  // Choose a representative geo (prefer EU27_2020, EA20, EA19), else first
-  let chosen = null;
-  const prio = ['EU27_2020','EA20','EA19','EU28','EU27'];
+  let chosen = null; const prio = ['EU27_2020','EA20','EA19','EU28','EU27'];
   if (countryKey) {
     const all = new Set(rows.map(r=> String(r[countryKey])));
     chosen = prio.find(x=> all.has(x)) || [...all][0];
@@ -157,15 +158,23 @@ function renderLineChart(points, label){
 }
 
 function renderTableFromBars(items){
-  let html = '<table><thead><tr><th>country</th><th>value</th></tr></thead><tbody>';
+  let html = '<table><thead><tr><th>land</th><th>waarde</th></tr></thead><tbody>';
   html += items.map(i=> `<tr><td>${i.label}</td><td>${i.y}</td></tr>`).join('');
   html += '</tbody></table>'; tableWrap.innerHTML = html;
 }
 function renderTableFromPoints(points){
   const fmt = new Intl.DateTimeFormat('en-CA',{year:'numeric',month:'2-digit',day:'2-digit'});
-  let html = '<table><thead><tr><th>period</th><th>value</th></tr></thead><tbody>';
+  let html = '<table><thead><tr><th>periode</th><th>waarde</th></tr></thead><tbody>';
   html += points.map(p=> `<tr><td>${fmt.format(p.x).slice(0,7)}</td><td>${p.y}</td></tr>`).join('');
   html += '</tbody></table>'; tableWrap.innerHTML = html;
+}
+
+function renderGlossaryIfNeeded(rows, countryKey){
+  const codes = new Set(rows.map(r=> String(r[countryKey] ?? '')).filter(Boolean));
+  const found = Object.keys(AGG_EXPLAIN).filter(code => codes.has(code));
+  if (!found.length) { glossWrap.innerHTML = ''; return; }
+  const items = found.map(code => `<li><code>${code}</code> — ${AGG_EXPLAIN[code]}</li>`).join('');
+  glossWrap.innerHTML = `<strong>Labelverklaring:</strong><ul>${items}</ul>`;
 }
 
 async function load(url){
@@ -180,37 +189,39 @@ async function load(url){
     if (!numericKeys.length) throw new Error('Geen numerieke kolommen gevonden.');
     const defaultValueKey = preferredExisting[0] || numericKeys[0];
 
-    // UI: populate value dropdown (once per load)
+    // UI dropdown
     seriesKeySelect.innerHTML = numericKeys.map(k=>`<option value="${k}" ${k===defaultValueKey?'selected':''}>${k}</option>`).join('');
     const valueKey = seriesKeySelect.value || defaultValueKey;
 
-    const { uniqueTimes, uniqueGeos } = summarizeShape(rows, timeKey, countryKey);
+    const times = new Set(rows.map(r => timeKey ? String(r[timeKey]) : '')); const uniqueTimes = [...times].filter(Boolean);
 
-    // Decide mode
     if (timeKey && uniqueTimes.length === 1 && countryKey) {
-      // Single period, multiple countries → BAR
+      // Single period ⇒ landenranglijst (bar)
       const bars = buildBarData(rows, countryKey, valueKey);
       renderBarChart(bars, `${uniqueTimes[0]} · ${valueKey}`);
       renderTableFromBars(bars);
+      renderGlossaryIfNeeded(rows, countryKey);
       meta.innerHTML = `Bron: <code>${url}</code><br>Records: <b>${rows.length}</b> · Periode: <b>${uniqueTimes[0]||'n/a'}</b> · Waarde: <code>${valueKey}</code>`;
       setMessage('');
       return;
     }
 
-    // Otherwise: Time series (choose a geo if multiple)
+    // Anders: tijdreeks
     if (timeKey) {
       const { pts, chosenGeo } = buildTimeSeries(rows, timeKey, valueKey, countryKey);
       if (pts.length) {
         await ensureTimeAdapter();
         renderLineChart(pts, `${chosenGeo||'all'} · ${valueKey}`);
         renderTableFromPoints(pts);
+        // Glossary voor gekozen geo (als aggregate)
+        if (AGG_EXPLAIN[chosenGeo]) { glossWrap.innerHTML = `<strong>Labelverklaring:</strong><ul><li><code>${chosenGeo}</code> — ${AGG_EXPLAIN[chosenGeo]}</li></ul>`; } else { glossWrap.innerHTML = ''; }
         meta.innerHTML = `Bron: <code>${url}</code><br>Records: <b>${rows.length}</b> · Geo: <b>${chosenGeo||'n/a'}</b> · Waarde: <code>${valueKey}</code>`;
         setMessage('');
         return;
       }
     }
 
-    throw new Error('Kon geen tijdreeks of landenranglijst renderen (controleer kolomnamen).');
+    throw new Error('Kon geen visual renderen (controleer kolomnamen).');
   }catch(err){ console.error(err); setMessage('Fout: '+ err.message, 'error'); }
 }
 

@@ -1,0 +1,54 @@
+name: Deploy website (site/ + data/) to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "site/**"
+      - "data/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write        # nodig voor deploy
+  id-token: write     # nodig voor deploy
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Kopieer data/ mee naar de site build, zodat /data/latest/... werkt
+      - name: Prepare site folder
+        run: |
+          set -euxo pipefail
+          test -d site || (echo "site/ ontbreekt" && exit 1)
+          mkdir -p site/data
+          rsync -a --delete data/ site/data/ || true
+          # Optioneel: maak een eenvoudige index als hij ontbreekt
+          if [ ! -f site/index.html ]; then
+            cat > site/index.html <<'HTML'
+            <!doctype html><meta charset="utf-8">
+            <title>Eufacts</title><h1>Eufacts</h1>
+            <p>Upload hier je eigen index.html in <code>site/</code>.</p>
+            HTML
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

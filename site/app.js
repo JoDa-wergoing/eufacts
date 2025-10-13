@@ -1,5 +1,9 @@
-<!-- FILE: site/app.js (v3.2) -->
-// ---- Config ----
+<!-- FILE: site/app.js (v3.3) -->
+// ---- Project defaults ----
+// Zero-baseline charts as team policy
+const Y_BASELINE = { beginAtZero: true, suggestedMin: 0 };
+
+// Data param / default
 const DEFAULT_DATA = new URLSearchParams(location.search).get('data') || './data/latest/teina230.json';
 
 const el = (id) => document.getElementById(id);
@@ -171,7 +175,7 @@ function renderBarChart(items, valueKey, periodText){
   const data = { labels: items.map(i=>i.label), datasets: [{ label: prettyMetricName(valueKey), data: items.map(i=>i.y) }] };
   const options = { responsive:true,
     plugins:{ legend:{ display:false }, title:{ display:true, text: prettyMetricName(valueKey) }, subtitle:{ display: !!periodText, text: periodText } },
-    scales:{ x:{ ticks:{ autoSkip:false, maxRotation:60, minRotation:0 } }, y:{ beginAtZero:false } } };
+    scales:{ x:{ ticks:{ autoSkip:false, maxRotation:60, minRotation:0 } }, y: { ...Y_BASELINE } } };
   if (CHART) CHART.destroy(); CHART = new Chart(ctx, { type:'bar', data, options });
 }
 
@@ -180,7 +184,7 @@ function renderLineChart(points, valueKey){
   const data = { datasets: [{ label: prettyMetricName(valueKey), data: points.map(p=>({x:p.x, y:p.y})), tension:.2 }] };
   const options = { responsive:true, parsing:false,
     plugins:{ legend:{ display:false }, title:{ display:true, text: prettyMetricName(valueKey) }, subtitle:{ display:true, text: periodLabelFromPoints(points) } },
-    scales:{ x:{ type:'time', time:{ unit:'month' } }, y:{ beginAtZero:false } } };
+    scales:{ x:{ type:'time', time:{ unit:'month' } }, y: { ...Y_BASELINE } } };
   if (CHART) CHART.destroy(); CHART = new Chart(ctx, { type:'line', data, options });
 }
 

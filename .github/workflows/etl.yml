@@ -38,22 +38,24 @@ jobs:
           git status
           git diff --stat || true
 
-      - name: Commit generated data (if changed)
+      - name: Commit data changes (rebase-safe)
         run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          # Voeg alleen de data-map toe
+          set -euxo pipefail
           git add -A data/
-
-          # Commit alleen als er staged changes zijn
           if git diff --cached --quiet; then
             echo "No data changes to commit."
             exit 0
           fi
 
-          git commit -m "chore(data): update Eurostat TEINA230 outputs"
-          git push
+            ts="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          git commit -m "chore(data): update Eurostat TEINA230 outputs • ${ts}"
+
+          # Haal laatste remote op en rebase onze commit erbovenop
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+
+          # Push de gerebase-de HEAD naar dezelfde branch
+          git push origin HEAD:"${GITHUB_REF_NAME}"
+
 
       # Altijd handig: upload ook als artifact om direct te downloaden
       - name: Upload data artifacts

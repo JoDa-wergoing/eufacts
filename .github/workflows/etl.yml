@@ -38,6 +38,19 @@ jobs:
           git status
           git diff --stat || true
 
+      - name: Configure git user (safe)
+        run: |
+          set -euxo pipefail
+          if [[ "$GITHUB_ACTOR" == "github-actions[bot]" ]]; then
+            GIT_USER_NAME="github-actions[bot]"
+            GIT_USER_EMAIL="41898282+github-actions[bot]@users.noreply.github.com"
+          else
+            GIT_USER_NAME="${GITHUB_ACTOR}"
+            GIT_USER_EMAIL="${GITHUB_ACTOR}@users.noreply.github.com"
+          fi
+          git config user.name  "$GIT_USER_NAME"
+          git config user.email "$GIT_USER_EMAIL"
+
       - name: Commit data changes (rebase-safe)
         run: |
           set -euxo pipefail

@@ -30,7 +30,7 @@ jobs:
           pip install requests
 
       - name: Run ETL (Eurostat TEINA230)
-        run: python etl/eurostat_teina230.py
+        run: python etl/teina230.py
 
       # Optioneel: bekijk even wat er veranderd is
       - name: Show git status

@@ -1,11 +1,11 @@
-<!-- FILE: site/index.html (v3.1) -->
+<!-- FILE: site/index.html (v3.2) -->
 <!doctype html>
 <html lang="nl">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Eufacts • TEINA230 — Visual MVP (v3.1)</title>
-  <meta name="description" content="Eufacts viewer voor Eurostat TEINA230 — toont landennamen volledig en verklaart EA20 / EU27_2020 labels." />
+  <title>Eufacts • TEINA230 — Visual MVP (v3.2)</title>
+  <meta name="description" content="Eufacts viewer voor Eurostat TEINA230 — volledige landennamen, duidelijke titels/ondertitels, uitleg EA/EU labels." />
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script defer src="./app.js"></script>
@@ -38,8 +38,8 @@
 <body>
   <header>
     <div class="wrap">
-      <h1>Eufacts — <span class="badge">TEINA230</span> Visual MVP (v3.1)</h1>
-      <div class="sub">Één periode ⇒ landenranglijst (bar). Meerdere periodes ⇒ tijdreeks. Volledige landennamen + uitleg van EA/EU labels onderaan.</div>
+      <h1>Eufacts — <span class="badge">TEINA230</span> Visual MVP (v3.2)</h1>
+      <div class="sub">Één periode ⇒ landenranglijst (bar). Meerdere periodes ⇒ tijdreeks (EU/EA of geselecteerde geo). Volledige landennamen + uitleg van EA/EU labels onderaan.</div>
     </div>
   </header>
 
@@ -62,7 +62,7 @@
 
     <section class="grid">
       <div class="card">
-        <canvas id="chart" height="160"></canvas>
+        <canvas id="chart" height="180"></canvas>
       </div>
       <div class="card">
         <div id="meta" class="foot"></div>
@@ -74,7 +74,7 @@
       <div id="glossary" class="gloss"></div>
     </section>
 
-    <p class="foot">Publiceer als <code>site/index.html</code>. Plaats <code>site/app.js</code> ernaast. GitHub Pages serveert vervolgens alles onder <code>/eufacts/</code>.</p>
+    <p class="foot">Publiceer als <code>site/index.html</code>. Plaats <code>site/app.js</code> ernaast. Gebruik desgewenst <code>?data=./pad/naar.json</code>.</p>
 
     <div id="msg" class="foot"></div>
   </main>

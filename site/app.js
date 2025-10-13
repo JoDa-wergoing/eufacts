@@ -1,4 +1,4 @@
-<!-- FILE: site/app.js (v3.1) -->
+<!-- FILE: site/app.js (v3.2) -->
 // ---- Config ----
 const DEFAULT_DATA = new URLSearchParams(location.search).get('data') || './data/latest/teina230.json';
 
@@ -92,6 +92,7 @@ function detectKeys(rows){
   return { timeKey, countryKey, numericKeys: numericKeys.filter(k=>k!==timeKey && k!==countryKey), preferredExisting };
 }
 
+// Time parsing
 function parseTime(v){
   if (v==null) return null; const s = String(v).trim(); let m;
   m = s.match(/^(\d{4})-?Q([1-4])$/) || s.match(/^Q([1-4])-(\d{4})$/); if (m) { const year = m[2]?m[2]:m[1]; const q = m[2]?m[1]:m[2]; const month = (Number(q)-1)*3 + 1; return new Date(`${year}-${String(month).padStart(2,'0')}-01T00:00:00Z`); }
@@ -119,6 +120,28 @@ const AGG_EXPLAIN = {
   'EU27': 'Europese Unie — 27 landen.'
 };
 
+// Metric pretty names (for chart title)
+function prettyMetricName(key){
+  const map = {
+    value_pct_gdp: 'General government gross debt (% of GDP)',
+    value: 'Value',
+    OBS_VALUE: 'Observed value'
+  };
+  if (map[key]) return map[key];
+  return String(key).replace(/_/g,' ').replace(/\b\w/g, c=>c.toUpperCase());
+}
+
+// Subtitle period label from points
+function periodLabelFromPoints(points){
+  if(!points.length) return '';
+  const first = points[0].x, last = points[points.length-1].x;
+  const same = first.getTime() === last.getTime();
+  const fmtYM = (d)=> `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}`;
+  const monthToQ = (m)=> ({1:'Q1',4:'Q2',7:'Q3',10:'Q4'})[m] || null;
+  const asQuarter = (d)=>{ const m = d.getUTCMonth()+1; const q = monthToQ(m); return q ? `${d.getUTCFullYear()}-${q}` : fmtYM(d); };
+  return same ? asQuarter(first) : `${asQuarter(first)} – ${asQuarter(last)}`;
+}
+
 function buildBarData(rows, countryKey, valueKey){
   const items = rows.map(r=>({ label: labelForRow(r), code: r.country_code || r.geo || null, y: toNum(r[valueKey]) }))
                    .filter(p=> !isNaN(p.y));
@@ -143,17 +166,21 @@ async function ensureTimeAdapter(){
   if (window._chartTimeLoaded) return; await new Promise((resolve)=>{ const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3'; s.onload=resolve; document.head.appendChild(s); }); window._chartTimeLoaded = true;
 }
 
-function renderBarChart(items, label){
+function renderBarChart(items, valueKey, periodText){
   const ctx = document.getElementById('chart');
-  const data = { labels: items.map(i=>i.label), datasets: [{ label, data: items.map(i=>i.y) }] };
-  const options = { responsive:true, scales:{ x:{ ticks:{ autoSkip:false, maxRotation:60, minRotation:0 } }, y:{ beginAtZero:false } }, plugins:{ legend:{ display:true } } };
+  const data = { labels: items.map(i=>i.label), datasets: [{ label: prettyMetricName(valueKey), data: items.map(i=>i.y) }] };
+  const options = { responsive:true,
+    plugins:{ legend:{ display:false }, title:{ display:true, text: prettyMetricName(valueKey) }, subtitle:{ display: !!periodText, text: periodText } },
+    scales:{ x:{ ticks:{ autoSkip:false, maxRotation:60, minRotation:0 } }, y:{ beginAtZero:false } } };
   if (CHART) CHART.destroy(); CHART = new Chart(ctx, { type:'bar', data, options });
 }
 
-function renderLineChart(points, label){
+function renderLineChart(points, valueKey){
   const ctx = document.getElementById('chart');
-  const data = { datasets: [{ label, data: points.map(p=>({x:p.x, y:p.y})), tension:.2 }] };
-  const options = { responsive:true, parsing:false, scales:{ x:{ type:'time', time:{ unit:'month' } }, y:{ beginAtZero:false } }, plugins:{ legend:{ display:true } } };
+  const data = { datasets: [{ label: prettyMetricName(valueKey), data: points.map(p=>({x:p.x, y:p.y})), tension:.2 }] };
+  const options = { responsive:true, parsing:false,
+    plugins:{ legend:{ display:false }, title:{ display:true, text: prettyMetricName(valueKey) }, subtitle:{ display:true, text: periodLabelFromPoints(points) } },
+    scales:{ x:{ type:'time', time:{ unit:'month' } }, y:{ beginAtZero:false } } };
   if (CHART) CHART.destroy(); CHART = new Chart(ctx, { type:'line', data, options });
 }
 
@@ -198,7 +225,7 @@ async function load(url){
     if (timeKey && uniqueTimes.length === 1 && countryKey) {
       // Single period ⇒ landenranglijst (bar)
       const bars = buildBarData(rows, countryKey, valueKey);
-      renderBarChart(bars, `${uniqueTimes[0]} · ${valueKey}`);
+      renderBarChart(bars, valueKey, uniqueTimes[0]);
       renderTableFromBars(bars);
       renderGlossaryIfNeeded(rows, countryKey);
       meta.innerHTML = `Bron: <code>${url}</code><br>Records: <b>${rows.length}</b> · Periode: <b>${uniqueTimes[0]||'n/a'}</b> · Waarde: <code>${valueKey}</code>`;
@@ -211,7 +238,7 @@ async function load(url){
       const { pts, chosenGeo } = buildTimeSeries(rows, timeKey, valueKey, countryKey);
       if (pts.length) {
         await ensureTimeAdapter();
-        renderLineChart(pts, `${chosenGeo||'all'} · ${valueKey}`);
+        renderLineChart(pts, valueKey);
         renderTableFromPoints(pts);
         // Glossary voor gekozen geo (als aggregate)
         if (AGG_EXPLAIN[chosenGeo]) { glossWrap.innerHTML = `<strong>Labelverklaring:</strong><ul><li><code>${chosenGeo}</code> — ${AGG_EXPLAIN[chosenGeo]}</li></ul>`; } else { glossWrap.innerHTML = ''; }

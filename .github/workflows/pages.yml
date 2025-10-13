@@ -11,8 +11,8 @@ on:
 
 permissions:
   contents: read
-  pages: write        # nodig voor deploy
-  id-token: write     # nodig voor deploy
+  pages: write
+  id-token: write
 
 concurrency:
   group: "pages"
@@ -27,19 +27,32 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Prepare site folder
+
+      # Publiceer jouw bestaande site/index.html; kopieer data mee; maak 'latest' alias
+      - name: Prepare site folder (preserve your HTML)
         shell: bash
         run: |
           set -euxo pipefail
+
+          # 1) Vereist: site/ met jouw v2 index.html (niet overschrijven!)
           test -d site || (echo "site/ ontbreekt" && exit 1)
+          test -f site/index.html || (echo "site/index.html ontbreekt" && exit 1)
+
+          # 2) Neem data mee zodat ./data/... op Pages werkt
           mkdir -p site/data
-          # Kopieer data mee; als data/ (nog) niet bestaat, ga gewoon door
           rsync -a --delete data/ site/data/ || true
 
-          # Maak een simpele index als er nog geen index.html is
-          if [ ! -f site/index.html ]; then
-            printf '%s\n' '<!doctype html><meta charset="utf-8"><title>Eufacts</title><h1>Eufacts</h1><p>Upload hier je eigen index.html in <code>site/</code>.</p>' > site/index.html
+          # 3) Maak een 'latest' alias die jouw viewer verwacht
+          latest_json="$(ls -t data/snapshots/*/*.json 2>/dev/null | head -n1 || true)"
+          if [ -n "${latest_json}" ]; then
+            mkdir -p site/data/latest
+            cp "${latest_json}" "site/data/latest/teina230.json"
+          else
+            echo "Geen snapshots gevonden voor latest-alias — sla over."
           fi
+
+          # 4) Snelle sanity check op paden in HTML (relatief pad aanbevolen)
+          grep -q "./data/latest/teina230.json" site/index.html || true
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

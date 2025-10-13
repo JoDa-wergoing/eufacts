@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="nl">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Eufacts • teina230 — Visual MVP</title>
-  <meta name="description" content="Eufacts MVP: minimal, fast visual for Eurostat teina230 dataset" />
+  <title>Eufacts • teina230 — Visual MVP (v2)</title>
+  <meta name="description" content="Eufacts MVP: minimal, fast visual for Eurostat teina230 dataset (supports JSON/CSV/SDMX)" />
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <style>
@@ -34,8 +34,8 @@
 <body>
   <header>
     <div class="wrap">
-      <h1>Eufacts — <span class="badge">teina230</span> Visual MVP</h1>
-      <div class="sub">Minimalistische, statische pagina die data uit <code>data/latest/</code> laadt en een lijnchart + tabel toont. Gebruik <kbd>?data=</kbd> om een eigen pad te geven.</div>
+      <h1>Eufacts — <span class="badge">teina230</span> Visual MVP (v2)</h1>
+      <div class="sub">Laadt JSON/CSV/Eurostat SDMX. Gebruik <kbd>?data=</kbd> om een eigen pad te geven (relatief, bv. <code>?data=./data/snapshots/2025-10-13/eu_debt.json</code>).</div>
     </div>
   </header>
 
@@ -44,7 +44,7 @@
       <div class="row">
         <div>
           <label for="dataUrl">Data-bestand (JSON of CSV)</label>
-          <input id="dataUrl" placeholder="bv. data/latest/teina230.json" />
+          <input id="dataUrl" placeholder="bv. ./data/latest/teina230.json" />
         </div>
         <div>
           <label for="seriesKey">Waarde-kolom / key</label>
@@ -69,19 +69,20 @@
       <div id="tableWrap"></div>
     </section>
 
-    <p class="foot">Tip: Plaats dit bestand als <code>index.html</code> in de root of in <code>site/</code> en zet GitHub Pages aan (Settings → Pages). Structuur verwacht <code>data/latest/...</code> paden in dezelfde repo.</p>
+    <p class="foot">Tip: publiceer dit als <code>site/index.html</code> via GitHub Pages. De deploy-workflow kopieert <code>data/</code> naar <code>site/data/</code> en maakt <code>./data/latest/teina230.json</code> aan als alias naar de meest recente snapshot.</p>
 
     <div id="msg" class="foot"></div>
   </main>
 
   <script>
     // ---- Config ----
-    const DEFAULT_DATA = new URLSearchParams(location.search).get('data') || 'data/latest/teina230.json';
+    const DEFAULT_DATA = new URLSearchParams(location.search).get('data') || './data/latest/teina230.json';
 
-    // Accept two shapes:
-    // 1) Wide JSON array: [{time:"2020-01", value: 123.4, country:"EU27"}, ...]
-    //    Auto-detect numeric keys as selectable series.
-    // 2) CSV with headers; will be converted to array of objects.
+    // Accept shapes:
+    // 1) Array of objects: [{time:"2020-01", value: 123.4, geo:"EU27"}, ...]
+    // 2) CSV with headers → array of objects
+    // 3) Object JSON with rows in records/data/rows/items/result
+    // 4) Eurostat SDMX-JSON → flattened to [{time, value}]
 
     const el = (id) => document.getElementById(id);
     const dataUrlInput = el('dataUrl');
@@ -104,8 +105,9 @@
 
     function parseCSV(text){
       const lines = text.trim().split(/\r?\n/);
+      if (!lines.length) return [];
       const headers = lines.shift().split(',').map(h=>h.trim());
-      return lines.map(line=>{
+      return lines.filter(Boolean).map(line=>{
         const cols = line.split(',');
         const obj = {};
         headers.forEach((h,i)=> obj[h] = cols[i]!==undefined ? cols[i].trim() : '');
@@ -113,61 +115,116 @@
       });
     }
 
-    function tryParse(jsonOrCsv){
-      try { return { kind:'json', rows: JSON.parse(jsonOrCsv) }; }
-      catch(e){ /* not json */ }
-      return { kind:'csv', rows: parseCSV(jsonOrCsv) };
+    function tryParse(text){
+      try {
+        const j = JSON.parse(text);
+        return { kind:'json', json:j };
+      } catch(e) {
+        return { kind:'csv', rows: parseCSV(text) };
+      }
+    }
+
+    // ---- SDMX helpers ----
+    function sdmxToRows(sdmx){
+      if (!sdmx || !sdmx.structure || !Array.isArray(sdmx.dataSets)) return null;
+      const ds = sdmx.dataSets[0] || {};
+      const dimsObs = sdmx.structure?.dimensions?.observation || [];
+      const dimsTime = sdmx.structure?.dimensions?.time || [];
+      const timeDim = dimsObs.find(d=>/time/i.test(d.id)) || dimsTime[0];
+      const timeLabels = timeDim?.values || [];
+      const toTime = (idx)=>{
+        const v = timeLabels[idx];
+        return v?.name ?? v?.label ?? v ?? idx;
+      };
+      const out = [];
+      if (ds.observations) {
+        // observations: {"0:0:3": [val, ...]}
+        Object.entries(ds.observations).forEach(([key, arr])=>{
+          const parts = key.split(':');
+          const tIdx = Number(parts[parts.length-1]);
+          const time = toTime(tIdx);
+          const value = Array.isArray(arr) ? arr[0] : arr;
+          if (time !== undefined && value !== null && value !== undefined) {
+            out.push({ time, value: Number(value) });
+          }
+        });
+      } else if (ds.series) {
+        Object.values(ds.series).forEach(s => {
+          const obs = s?.observations || {};
+          Object.entries(obs).forEach(([idx, arr])=>{
+            const time = toTime(Number(idx));
+            const value = Array.isArray(arr) ? arr[0] : arr;
+            if (time !== undefined && value !== null && value !== undefined) {
+              out.push({ time, value: Number(value) });
+            }
+          });
+        });
+      }
+      return out.length ? out : null;
+    }
+
+    function objectJsonToRows(obj){
+      if (Array.isArray(obj)) return obj;
+      for (const k of ['records','data','rows','items','result']) {
+        if (Array.isArray(obj?.[k])) return obj[k];
+      }
+      const sdmxRows = sdmxToRows(obj);
+      if (sdmxRows) return sdmxRows;
+      return null;
     }
 
     function detectKeys(rows){
       if(!rows.length) return { timeKey:null, numericKeys:[] };
       const sample = rows[0];
       const keys = Object.keys(sample);
-      // guess time key
       const timeCandidates = ['time','period','date','TIME','periods','year'];
       const timeKey = keys.find(k=> timeCandidates.includes(k)) || keys.find(k=>/time|date|year/i.test(k)) || keys[0];
-      // numeric keys
       const numericKeys = keys.filter(k=> rows.some(r=> !isNaN(parseFloat(r[k])) ));
-      // put time key at front if present
       return { timeKey, numericKeys: numericKeys.filter(k=>k!==timeKey) };
     }
 
     function normalize(rows, timeKey, seriesKey){
       const toDate = (v)=>{
-        if(/^\d{4}-\d{2}$/.test(v+'')) return new Date((v+'-01')+'T00:00:00Z');
-        if(/^\d{4}$/.test(v+'')) return new Date(`${v}-01-01T00:00:00Z`);
-        const d = new Date(v);
+        const sv = String(v);
+        if(/^\d{4}-\d{2}$/.test(sv)) return new Date(`${sv}-01T00:00:00Z`);
+        if(/^\d{4}$/.test(sv)) return new Date(`${sv}-01-01T00:00:00Z`);
+        const d = new Date(sv);
         return isNaN(d) ? null : d;
       };
-      const pts = rows.map(r=>({ x: toDate(r[timeKey]), y: parseFloat(r[seriesKey]), raw:r }))
+      const toNum = (v)=>{
+        if (typeof v === 'string') return Number(v.replace(',', '.'));
+        return Number(v);
+      };
+      const pts = rows.map(r=>({ x: toDate(r[timeKey]), y: toNum(r[seriesKey]), raw:r }))
                       .filter(p=> p.x instanceof Date && !isNaN(p.x) && !isNaN(p.y));
       pts.sort((a,b)=> a.x - b.x);
       return pts;
     }
 
+    function ensureTimeAdapter(){
+      return new Promise((resolve)=>{
+        if (window._chartTimeLoaded) return resolve();
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3';
+        s.onload = ()=>{ window._chartTimeLoaded = true; resolve(); };
+        document.head.appendChild(s);
+      });
+    }
+
     function renderChart(points, label){
       const ctx = document.getElementById('chart');
-      const data = {
-        datasets: [{ label, data: points.map(p=>({x:p.x, y:p.y})), tension:.2 }]
-      };
+      const data = { datasets: [{ label, data: points.map(p=>({x:p.x, y:p.y})), tension:.2 }] };
       const options = {
         responsive:true,
         parsing:false,
         scales:{ x:{ type:'time', time:{ unit:'month' } }, y:{ beginAtZero:false } },
         plugins:{ legend:{ display:true }, tooltip:{ callbacks:{ label:(c)=> `${c.parsed.y}` } } }
       };
-      // Lazy-load time adapter for Chart.js (date-fns)
-      if(!window._chartTimeLoaded){
-        const s = document.createElement('script');
-        s.src = 'https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3';
-        document.head.appendChild(s);
-        window._chartTimeLoaded = true;
-      }
       if(CHART){ CHART.destroy(); }
       CHART = new Chart(ctx, { type:'line', data, options });
     }
 
-    function renderTable(points, timeFmt='yyyy-MM'){
+    function renderTable(points){
       const fmt = new Intl.DateTimeFormat('en-CA', {year:'numeric', month:'2-digit', day:'2-digit'});
       let html = '<table><thead><tr><th>period</th><th>value</th></tr></thead><tbody>';
       html += points.map(p=> `<tr><td>${fmt.format(p.x).slice(0,7)}</td><td>${p.y}</td></tr>`).join('');
@@ -180,17 +237,26 @@
       try{
         const raw = await fetchText(url);
         const parsed = tryParse(raw);
-        const rows = parsed.rows;
-        if(!Array.isArray(rows) || rows.length===0) throw new Error('Lege of ongeldige dataset.');
-        const { timeKey, numericKeys } = detectKeys(rows);
 
-        // populate series dropdown once
+        let rows;
+        if (parsed.kind === 'csv') {
+          rows = parsed.rows;
+        } else {
+          rows = objectJsonToRows(parsed.json);
+        }
+
+        if(!Array.isArray(rows) || rows.length===0) throw new Error('Lege of ongeldige dataset (geen rijen afgeleid).');
+        const { timeKey, numericKeys } = detectKeys(rows);
+        if (!timeKey) throw new Error('Geen tijdkolom gevonden.');
+        if (!numericKeys.length) throw new Error('Geen numerieke kolommen gevonden.');
+
         seriesKeySelect.innerHTML = numericKeys.map(k=>`<option value="${k}">${k}</option>`).join('');
         const chosen = seriesKeySelect.value || numericKeys[0];
 
         const pts = normalize(rows, timeKey, chosen);
         if(!pts.length) throw new Error('Kon geen tijdreeks afleiden uit de data.');
 
+        await ensureTimeAdapter();
         renderChart(pts, chosen);
         renderTable(pts);
         meta.innerHTML = `Bron: <code>${url}</code><br>Records: <b>${rows.length}</b> · Tijdskey: <code>${timeKey}</code> · Waardekey: <code>${chosen}</code>`;

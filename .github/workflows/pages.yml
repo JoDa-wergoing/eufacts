@@ -28,31 +28,38 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Publiceer jouw bestaande site/index.html; kopieer data mee; maak 'latest' alias
-      - name: Prepare site folder (preserve your HTML)
+      - name: Prepare site folder (preserve HTML + copy data + build latest aliases)
         shell: bash
         run: |
           set -euxo pipefail
 
-          # 1) Vereist: site/ met jouw v2 index.html (niet overschrijven!)
+          # 1) Vereist: site/ met je index.html
           test -d site || (echo "site/ ontbreekt" && exit 1)
           test -f site/index.html || (echo "site/index.html ontbreekt" && exit 1)
 
-          # 2) Neem data mee zodat ./data/... op Pages werkt
+          # 2) Kopieer data/ mee naar de publicatiemap
           mkdir -p site/data
           rsync -a --delete data/ site/data/ || true
 
-          # 3) Maak een 'latest' alias die jouw viewer verwacht
-          latest_json="$(ls -t data/snapshots/*/*.json 2>/dev/null | head -n1 || true)"
-          if [ -n "${latest_json}" ]; then
-            mkdir -p site/data/latest
-            cp "${latest_json}" "site/data/latest/teina230.json"
-          else
-            echo "Geen snapshots gevonden voor latest-alias — sla over."
-          fi
+          # 3) Maak generieke 'latest' aliassen voor ALLE datasets in snapshots
+          mkdir -p site/data/latest
+          if [ -d data/snapshots ]; then
+            # verzamel unieke bestandsbasenamen (zonder .json)
+            IFS=$'\n' read -r -d '' -a DATASETS < <(find data/snapshots -type f -name '*.json' -printf '%f\n' | sed 's/\.json$//' | sort -u && printf '\0') || true
 
-          # 4) Snelle sanity check op paden in HTML (relatief pad aanbevolen)
-          grep -q "./data/latest/teina230.json" site/index.html || true
+            for ds in "${DATASETS[@]}"; do
+              # pak de nieuwste file voor deze dataset (op basis van mtime)
+              latest_json="$(ls -t data/snapshots/*/${ds}.json 2>/dev/null | head -n1 || true)"
+              if [ -n "${latest_json}" ]; then
+                cp "${latest_json}" "site/data/latest/${ds}.json"
+                echo "Aliased ${latest_json} -> site/data/latest/${ds}.json"
+              else
+                echo "Geen bestand gevonden voor dataset ${ds} — sla over."
+              fi
+            done
+          else
+            echo "Geen data/snapshots map — sla latest-alias stap over."
+          fi
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

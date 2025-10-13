@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Eufacts • teina230 — Visual MVP</title>
+  <meta name="description" content="Eufacts MVP: minimal, fast visual for Eurostat teina230 dataset" />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <style>
+    :root { --fg:#0f172a; --muted:#475569; --bg:#f8fafc; --card:#ffffff; --ring:#e2e8f0; }
+    *{box-sizing:border-box}
+    body{margin:0; font:16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji"; color:var(--fg); background:var(--bg)}
+    header{position:sticky; top:0; z-index:10; backdrop-filter:saturate(180%) blur(8px); background:rgba(248,250,252,.85); border-bottom:1px solid var(--ring)}
+    .wrap{max-width:1100px; margin:0 auto; padding:16px}
+    h1{font-size:20px; margin:0 0 4px 0}
+    .sub{color:var(--muted); font-size:13px}
+    .grid{display:grid; grid-template-columns: 1fr; gap:16px; padding:16px;}
+    @media(min-width:900px){ .grid{ grid-template-columns: 2fr 1fr; } }
+    .card{background:var(--card); border:1px solid var(--ring); border-radius:14px; padding:14px; box-shadow:0 1px 0 rgba(15,23,42,.03)}
+    label{font-size:13px; color:var(--muted); display:block; margin-bottom:6px}
+    input, select{width:100%; padding:10px 12px; border:1px solid var(--ring); border-radius:10px; font-size:14px; background:#fff}
+    .row{display:flex; gap:10px; align-items:end}
+    .row > div{flex:1}
+    table{width:100%; border-collapse:collapse; font-size:13px}
+    th,td{padding:8px 10px; border-bottom:1px solid var(--ring); text-align:left}
+    th{font-weight:600; color:var(--muted)}
+    .badge{display:inline-block; padding:.2rem .5rem; border-radius:999px; background:#eef2ff; color:#3730a3; font-size:12px}
+    .foot{color:var(--muted); font-size:12px}
+    .error{color:#b91c1c; background:#fef2f2; border:1px solid #fee2e2; padding:10px; border-radius:10px}
+    kbd{background:#e2e8f0; padding:2px 6px; border-radius:6px; font-size:12px}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>Eufacts — <span class="badge">teina230</span> Visual MVP</h1>
+      <div class="sub">Minimalistische, statische pagina die data uit <code>data/latest/</code> laadt en een lijnchart + tabel toont. Gebruik <kbd>?data=</kbd> om een eigen pad te geven.</div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="card">
+      <div class="row">
+        <div>
+          <label for="dataUrl">Data-bestand (JSON of CSV)</label>
+          <input id="dataUrl" placeholder="bv. data/latest/teina230.json" />
+        </div>
+        <div>
+          <label for="seriesKey">Waarde-kolom / key</label>
+          <select id="seriesKey"></select>
+        </div>
+        <div>
+          <button id="loadBtn" style="padding:10px 14px; border-radius:10px; border:1px solid var(--ring); background:#111827; color:#fff; font-weight:600">Laad</button>
+        </div>
+      </div>
+    </div>
+
+    <section class="grid">
+      <div class="card">
+        <canvas id="chart" height="140"></canvas>
+      </div>
+      <div class="card">
+        <div id="meta" class="foot"></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div id="tableWrap"></div>
+    </section>
+
+    <p class="foot">Tip: Plaats dit bestand als <code>index.html</code> in de root of in <code>site/</code> en zet GitHub Pages aan (Settings → Pages). Structuur verwacht <code>data/latest/...</code> paden in dezelfde repo.</p>
+
+    <div id="msg" class="foot"></div>
+  </main>
+
+  <script>
+    // ---- Config ----
+    const DEFAULT_DATA = new URLSearchParams(location.search).get('data') || 'data/latest/teina230.json';
+
+    // Accept two shapes:
+    // 1) Wide JSON array: [{time:"2020-01", value: 123.4, country:"EU27"}, ...]
+    //    Auto-detect numeric keys as selectable series.
+    // 2) CSV with headers; will be converted to array of objects.
+
+    const el = (id) => document.getElementById(id);
+    const dataUrlInput = el('dataUrl');
+    const seriesKeySelect = el('seriesKey');
+    const msg = el('msg');
+    const meta = el('meta');
+    const tableWrap = el('tableWrap');
+
+    let CHART;
+
+    function setMessage(text, kind='info'){
+      msg.innerHTML = text ? `<div class="${kind==='error'?'error':'foot'}">${text}</div>` : '';
+    }
+
+    async function fetchText(url){
+      const res = await fetch(url, {cache:'no-store'});
+      if(!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
+      return await res.text();
+    }
+
+    function parseCSV(text){
+      const lines = text.trim().split(/\r?\n/);
+      const headers = lines.shift().split(',').map(h=>h.trim());
+      return lines.map(line=>{
+        const cols = line.split(',');
+        const obj = {};
+        headers.forEach((h,i)=> obj[h] = cols[i]!==undefined ? cols[i].trim() : '');
+        return obj;
+      });
+    }
+
+    function tryParse(jsonOrCsv){
+      try { return { kind:'json', rows: JSON.parse(jsonOrCsv) }; }
+      catch(e){ /* not json */ }
+      return { kind:'csv', rows: parseCSV(jsonOrCsv) };
+    }
+
+    function detectKeys(rows){
+      if(!rows.length) return { timeKey:null, numericKeys:[] };
+      const sample = rows[0];
+      const keys = Object.keys(sample);
+      // guess time key
+      const timeCandidates = ['time','period','date','TIME','periods','year'];
+      const timeKey = keys.find(k=> timeCandidates.includes(k)) || keys.find(k=>/time|date|year/i.test(k)) || keys[0];
+      // numeric keys
+      const numericKeys = keys.filter(k=> rows.some(r=> !isNaN(parseFloat(r[k])) ));
+      // put time key at front if present
+      return { timeKey, numericKeys: numericKeys.filter(k=>k!==timeKey) };
+    }
+
+    function normalize(rows, timeKey, seriesKey){
+      const toDate = (v)=>{
+        if(/^\d{4}-\d{2}$/.test(v+'')) return new Date((v+'-01')+'T00:00:00Z');
+        if(/^\d{4}$/.test(v+'')) return new Date(`${v}-01-01T00:00:00Z`);
+        const d = new Date(v);
+        return isNaN(d) ? null : d;
+      };
+      const pts = rows.map(r=>({ x: toDate(r[timeKey]), y: parseFloat(r[seriesKey]), raw:r }))
+                      .filter(p=> p.x instanceof Date && !isNaN(p.x) && !isNaN(p.y));
+      pts.sort((a,b)=> a.x - b.x);
+      return pts;
+    }
+
+    function renderChart(points, label){
+      const ctx = document.getElementById('chart');
+      const data = {
+        datasets: [{ label, data: points.map(p=>({x:p.x, y:p.y})), tension:.2 }]
+      };
+      const options = {
+        responsive:true,
+        parsing:false,
+        scales:{ x:{ type:'time', time:{ unit:'month' } }, y:{ beginAtZero:false } },
+        plugins:{ legend:{ display:true }, tooltip:{ callbacks:{ label:(c)=> `${c.parsed.y}` } } }
+      };
+      // Lazy-load time adapter for Chart.js (date-fns)
+      if(!window._chartTimeLoaded){
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3';
+        document.head.appendChild(s);
+        window._chartTimeLoaded = true;
+      }
+      if(CHART){ CHART.destroy(); }
+      CHART = new Chart(ctx, { type:'line', data, options });
+    }
+
+    function renderTable(points, timeFmt='yyyy-MM'){
+      const fmt = new Intl.DateTimeFormat('en-CA', {year:'numeric', month:'2-digit', day:'2-digit'});
+      let html = '<table><thead><tr><th>period</th><th>value</th></tr></thead><tbody>';
+      html += points.map(p=> `<tr><td>${fmt.format(p.x).slice(0,7)}</td><td>${p.y}</td></tr>`).join('');
+      html += '</tbody></table>';
+      tableWrap.innerHTML = html;
+    }
+
+    async function load(url){
+      setMessage('Laden…');
+      try{
+        const raw = await fetchText(url);
+        const parsed = tryParse(raw);
+        const rows = parsed.rows;
+        if(!Array.isArray(rows) || rows.length===0) throw new Error('Lege of ongeldige dataset.');
+        const { timeKey, numericKeys } = detectKeys(rows);
+
+        // populate series dropdown once
+        seriesKeySelect.innerHTML = numericKeys.map(k=>`<option value="${k}">${k}</option>`).join('');
+        const chosen = seriesKeySelect.value || numericKeys[0];
+
+        const pts = normalize(rows, timeKey, chosen);
+        if(!pts.length) throw new Error('Kon geen tijdreeks afleiden uit de data.');
+
+        renderChart(pts, chosen);
+        renderTable(pts);
+        meta.innerHTML = `Bron: <code>${url}</code><br>Records: <b>${rows.length}</b> · Tijdskey: <code>${timeKey}</code> · Waardekey: <code>${chosen}</code>`;
+        setMessage('');
+      }catch(err){
+        console.error(err);
+        setMessage('Fout: '+ err.message, 'error');
+      }
+    }
+
+    // Wire UI
+    document.getElementById('loadBtn').addEventListener('click', ()=> load(dataUrlInput.value || DEFAULT_DATA));
+    seriesKeySelect.addEventListener('change', ()=> document.getElementById('loadBtn').click());
+
+    // Boot
+    dataUrlInput.value = DEFAULT_DATA;
+    load(DEFAULT_DATA);
+  </script>
+</body>
+</html>

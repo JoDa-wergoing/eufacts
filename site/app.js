@@ -1,260 +1,158 @@
-<!-- FILE: app.js (v3.4) -->
-// ---- Project defaults ----
-const Y_BASELINE = { beginAtZero: true, suggestedMin: 0 };
-const DEFAULT_DATA = new URLSearchParams(location.search).get('data') || './data/latest/teina230.json';
+  // ---- Config ----
+    const DEFAULT_DATA = new URLSearchParams(location.search).get('data') || './data/latest/teina230.json';
 
-const el = (id) => document.getElementById(id);
-const dataUrlInput = el('dataUrl');
-const seriesKeySelect = el('seriesKey');
-const msg = el('msg');
-const meta = el('meta');
-const tableWrap = el('tableWrap');
-const glossWrap = el('glossary');
-let CHART;
+    const el = (id) => document.getElementById(id);
+    const dataUrlInput = el('dataUrl');
+    const seriesKeySelect = el('seriesKey');
+    const msg = el('msg');
+    const meta = el('meta');
+    const tableWrap = el('tableWrap');
+    let CHART;
 
-function setMessage(text, kind='info'){
-  msg.innerHTML = text ? `<div class="${kind==='error'?'error':'foot'}">${text}</div>` : '';
-}
-async function fetchText(url){
-  const res = await fetch(url, {cache:'no-store'});
-  if(!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
-  return await res.text();
-}
-
-// CSV → array of objects
-function parseCSV(text){
-  const lines = text.trim().split(/\r?\n/);
-  if (!lines.length) return [];
-  const headers = lines.shift().split(',').map(h=>h.trim());
-  return lines.filter(Boolean).map(line=>{
-    const cols = line.split(',');
-    const obj = {};
-    headers.forEach((h,i)=> obj[h] = cols[i]!==undefined ? cols[i].trim() : '');
-    return obj;
-  });
-}
-
-function tryParse(text){
-  try { return { kind:'json', json: JSON.parse(text) }; }
-  catch(e){ return { kind:'csv', rows: parseCSV(text) }; }
-}
-
-// Eurostat SDMX flatten (light)
-function sdmxToRows(sdmx){
-  if (!sdmx || !sdmx.structure || !Array.isArray(sdmx.dataSets)) return null;
-  const ds = sdmx.dataSets[0] || {};
-  const dimsObs = sdmx.structure?.dimensions?.observation || [];
-  const dimsTime = sdmx.structure?.dimensions?.time || [];
-  const timeDim = dimsObs.find(d=>/time/i.test(d.id)) || dimsTime[0];
-  const timeLabels = timeDim?.values || [];
-  const toTime = (idx)=>{ const v = timeLabels[idx]; return v?.name ?? v?.label ?? v ?? idx; };
-  const out = [];
-  if (ds.observations) {
-    Object.entries(ds.observations).forEach(([key, arr])=>{
-      const tIdx = Number(key.split(':').pop());
-      const time = toTime(tIdx);
-      const value = Array.isArray(arr) ? arr[0] : arr;
-      if (time!==undefined && value!=null) out.push({ time, value:Number(value) });
-    });
-  } else if (ds.series) {
-    Object.values(ds.series).forEach(s => {
-      const obs = s?.observations || {};
-      Object.entries(obs).forEach(([idx, arr])=>{
-        const time = toTime(Number(idx));
-        const value = Array.isArray(arr) ? arr[0] : arr;
-        if (time!==undefined && value!=null) out.push({ time, value:Number(value) });
-      });
-    });
-  }
-  return out.length ? out : null;
-}
-
-function objectJsonToRows(obj){
-  if (Array.isArray(obj)) return obj;
-  if (Array.isArray(obj?.records)) return obj.records;
-  for (const k of ['data','rows','items','result']) { if (Array.isArray(obj?.[k])) return obj[k]; }
-  const sdmx = sdmxToRows(obj); if (sdmx) return sdmx; return null;
-}
-
-// Prefer full country names; fallback to codes or geo
-function labelForRow(r){
-  return r.country ?? r.country_name ?? r.name ?? r.geo_label ?? r.country_code ?? r.geo ?? '?';
-}
-
-function detectKeys(rows){
-  if(!rows.length) return { timeKey:null, countryKey:null, numericKeys:[], preferredExisting:[] };
-  const sample = rows[0];
-  const keys = Object.keys(sample);
-  const timeKey = keys.find(k=> ['time','TIME_PERIOD','date','period','year'].includes(k)) || keys.find(k=>/time|period|date|year/i.test(k));
-  const countryKey = keys.find(k=> ['country','country_name','name','geo_label','country_code','geo','GEO'].includes(k)) || keys.find(k=>/country|geo/i.test(k));
-  const numericKeys = keys.filter(k=> rows.some(r=> !isNaN(parseFloat(String(r[k]).replace(',','.'))) ));
-  const preferred = ['value_pct_gdp','value','OBS_VALUE'];
-  const preferredExisting = preferred.filter(k => numericKeys.includes(k));
-  return { timeKey, countryKey, numericKeys: numericKeys.filter(k=>k!==timeKey && k!==countryKey), preferredExisting };
-}
-
-// Time parsing (supports YYYY, YYYY-MM, YYYY-Qn, YYYYMn, YYYYMM)
-function parseTime(v){
-  if (v==null) return null; const s = String(v).trim(); let m;
-  m = s.match(/^(\d{4})-?Q([1-4])$/) || s.match(/^Q([1-4])-(\d{4})$/); if (m) { const year = m[2]?m[2]:m[1]; const q = m[2]?m[1]:m[2]; const month = (Number(q)-1)*3 + 1; return new Date(`${year}-${String(month).padStart(2,'0')}-01T00:00:00Z`); }
-  m = s.match(/^(\d{4})-(\d{1,2})$/); if (m) return new Date(`${m[1]}-${String(m[2]).padStart(2,'0')}-01T00:00:00Z`);
-  m = s.match(/^(\d{4})$/); if (m) return new Date(`${m[1]}-01-01T00:00:00Z`);
-  m = s.match(/^(\d{4})M(\d{1,2})$/); if (m) return new Date(`${m[1]}-${String(m[2]).padStart(2,'0')}-01T00:00:00Z`);
-  m = s.match(/^(\d{4})(\d{2})$/); if (m) return new Date(`${m[1]}-${m[2]}-01T00:00:00Z`);
-  const d = new Date(s); return isNaN(d) ? null : d;
-}
-
-function toNum(v){ if (typeof v === 'string') return Number(v.replace(',','.')); return Number(v); }
-
-function summarizeShape(rows, timeKey, countryKey){
-  const times = new Set(); const geos = new Set();
-  rows.forEach(r=>{ if(timeKey && r[timeKey]!=null) times.add(String(r[timeKey])); if(countryKey && r[countryKey]!=null) geos.add(String(r[countryKey])); });
-  return { uniqueTimes: [...times], uniqueGeos: [...geos] };
-}
-
-// Aggregate labels → explanations
-const AGG_EXPLAIN = {
-  'EA20': 'Euro area — 20 landen (sinds 2023).',
-  'EA19': 'Euro area — 19 landen (t/m 2022).',
-  'EU27_2020': 'Europese Unie — 27 landen (sinds 2020).',
-  'EU28': 'Europese Unie — 28 landen (t/m 2020).',
-  'EU27': 'Europese Unie — 27 landen.'
-};
-
-// Metric pretty names (for chart title)
-function prettyMetricName(key){
-  const map = {
-    value_pct_gdp: 'General government gross debt (% of GDP)',
-    value: 'Value',
-    OBS_VALUE: 'Observed value'
-  };
-  if (map[key]) return map[key];
-  return String(key).replace(/_/g,' ').replace(/\b\w/g, c=>c.toUpperCase());
-}
-
-// Subtitle period label from points
-function periodLabelFromPoints(points){
-  if(!points.length) return '';
-  const first = points[0].x, last = points[points.length-1].x;
-  const same = first.getTime() === last.getTime();
-  const fmtYM = (d)=> `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}`;
-  const monthToQ = (m)=> ({1:'Q1',4:'Q2',7:'Q3',10:'Q4'})[m] || null;
-  const asQuarter = (d)=>{ const m = d.getUTCMonth()+1; const q = monthToQ(m); return q ? `${d.getUTCFullYear()}-${q}` : fmtYM(d); };
-  return same ? asQuarter(first) : `${asQuarter(first)} – ${asQuarter(last)}`;
-}
-
-function buildBarData(rows, countryKey, valueKey){
-  const items = rows.map(r=>({ label: labelForRow(r), code: r.country_code || r.geo || null, y: toNum(r[valueKey]) }))
-                   .filter(p=> !isNaN(p.y));
-  items.sort((a,b)=> b.y - a.y);
-  return items;
-}
-
-function buildTimeSeries(rows, timeKey, valueKey, countryKey){
-  let chosen = null; const prio = ['EU27_2020','EA20','EA19','EU28','EU27'];
-  if (countryKey) {
-    const all = new Set(rows.map(r=> String(r[countryKey])));
-    chosen = prio.find(x=> all.has(x)) || [...all][0];
-  }
-  const filtered = countryKey ? rows.filter(r=> String(r[countryKey]) === chosen) : rows;
-  const pts = filtered.map(r=> ({ x: parseTime(r[timeKey]), y: toNum(r[valueKey]) }))
-                      .filter(p=> p.x instanceof Date && !isNaN(p.x) && !isNaN(p.y))
-                      .sort((a,b)=> a.x - b.x);
-  return { pts, chosenGeo: chosen };
-}
-
-async function ensureTimeAdapter(){
-  if (window._chartTimeLoaded) return; await new Promise((resolve)=>{ const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3'; s.onload=resolve; document.head.appendChild(s); }); window._chartTimeLoaded = true;
-}
-
-function renderBarChart(items, valueKey, periodText){
-  const ctx = document.getElementById('chart');
-  const data = { labels: items.map(i=>i.label), datasets: [{ label: prettyMetricName(valueKey), data: items.map(i=>i.y) }] };
-  const options = { responsive:true,
-    plugins:{ legend:{ display:false }, title:{ display:true, text: prettyMetricName(valueKey) }, subtitle:{ display: !!periodText, text: periodText } },
-    scales:{ x:{ ticks:{ autoSkip:false, maxRotation:60, minRotation:0 } }, y: { ...Y_BASELINE } } };
-  if (CHART) CHART.destroy(); CHART = new Chart(ctx, { type:'bar', data, options });
-}
-
-function renderLineChart(points, valueKey){
-  const ctx = document.getElementById('chart');
-  const data = { datasets: [{ label: prettyMetricName(valueKey), data: points.map(p=>({x:p.x, y:p.y})), tension:.2 }] };
-  const options = { responsive:true, parsing:false,
-    plugins:{ legend:{ display:false }, title:{ display:true, text: prettyMetricName(valueKey) }, subtitle:{ display:true, text: periodLabelFromPoints(points) } },
-    scales:{ x:{ type:'time', time:{ unit:'month' } }, y: { ...Y_BASELINE } } };
-  if (CHART) CHART.destroy(); CHART = new Chart(ctx, { type:'line', data, options });
-}
-
-function renderTableFromBars(items){
-  let html = '<table><thead><tr><th>land</th><th>waarde</th></tr></thead><tbody>';
-  html += items.map(i=> `<tr><td>${i.label}</td><td>${i.y}</td></tr>`).join('');
-  html += '</tbody></table>'; tableWrap.innerHTML = html;
-}
-function renderTableFromPoints(points){
-  const fmt = new Intl.DateTimeFormat('en-CA',{year:'numeric',month:'2-digit',day:'2-digit'});
-  let html = '<table><thead><tr><th>periode</th><th>waarde</th></tr></thead><tbody>';
-  html += points.map(p=> `<tr><td>${fmt.format(p.x).slice(0,7)}</td><td>${p.y}</td></tr>`).join('');
-  html += '</tbody></table>'; tableWrap.innerHTML = html;
-}
-
-function renderGlossaryIfNeeded(rows, countryKey){
-  const codes = new Set(rows.map(r=> String(r[countryKey] ?? '')).filter(Boolean));
-  const found = Object.keys(AGG_EXPLAIN).filter(code => codes.has(code));
-  if (!found.length) { glossWrap.innerHTML = ''; return; }
-  const items = found.map(code => `<li><code>${code}</code> — ${AGG_EXPLAIN[code]}</li>`).join('');
-  glossWrap.innerHTML = `<strong>Labelverklaring:</strong><ul>${items}</ul>`;
-}
-
-async function load(url){
-  setMessage('Laden…');
-  try{
-    const raw = await fetchText(url);
-    const parsed = tryParse(raw);
-    const rows = parsed.kind==='csv' ? parsed.rows : objectJsonToRows(parsed.json);
-    if(!Array.isArray(rows) || rows.length===0) throw new Error('Lege of ongeldige dataset.');
-
-    const { timeKey, countryKey, numericKeys, preferredExisting } = detectKeys(rows);
-    if (!numericKeys.length) throw new Error('Geen numerieke kolommen gevonden.');
-    const defaultValueKey = preferredExisting[0] || numericKeys[0];
-
-    // UI dropdown
-    seriesKeySelect.innerHTML = numericKeys.map(k=>`<option value="${k}" ${k===defaultValueKey?'selected':''}>${k}</option>`).join('');
-    const valueKey = seriesKeySelect.value || defaultValueKey;
-
-    const { uniqueTimes } = summarizeShape(rows, timeKey, countryKey);
-
-    if (timeKey && uniqueTimes.length === 1 && countryKey) {
-      // Single period ⇒ landenranglijst (bar)
-      const bars = buildBarData(rows, countryKey, valueKey);
-      renderBarChart(bars, valueKey, uniqueTimes[0]);
-      renderTableFromBars(bars);
-      renderGlossaryIfNeeded(rows, countryKey);
-      meta.innerHTML = `Bron: <code>${url}</code><br>Records: <b>${rows.length}</b> · Periode: <b>${uniqueTimes[0]||'n/a'}</b> · Waarde: <code>${valueKey}</code>`;
-      setMessage('');
-      return;
+    function setMessage(text, kind='info'){
+      msg.innerHTML = text ? `<div class="${kind==='error'?'error':'foot'}">${text}</div>` : '';
     }
 
-    // Anders: tijdreeks
-    if (timeKey) {
-      const { pts, chosenGeo } = buildTimeSeries(rows, timeKey, valueKey, countryKey);
-      if (pts.length) {
-        await ensureTimeAdapter();
-        renderLineChart(pts, valueKey);
-        renderTableFromPoints(pts);
-        if (AGG_EXPLAIN[chosenGeo]) { glossWrap.innerHTML = `<strong>Labelverklaring:</strong><ul><li><code>${chosenGeo}</code> — ${AGG_EXPLAIN[chosenGeo]}</li></ul>`; } else { glossWrap.innerHTML = ''; }
-        meta.innerHTML = `Bron: <code>${url}</code><br>Records: <b>${rows.length}</b> · Geo: <b>${chosenGeo||'n/a'}</b> · Waarde: <code>${valueKey}</code>`;
+    async function fetchText(url){
+      const res = await fetch(url, {cache:'no-store'});
+      if(!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
+      return await res.text();
+    }
+
+    // CSV → rows
+    function parseCSV(text){
+      const lines = text.trim().split(/\r?\n/);
+      if (!lines.length) return [];
+      const headers = lines.shift().split(',').map(h=>h.trim());
+      return lines.filter(Boolean).map(line=>{
+        const cols = line.split(',');
+        const obj = {};
+        headers.forEach((h,i)=> obj[h] = cols[i]!==undefined ? cols[i].trim() : '');
+        return obj;
+      });
+    }
+
+    // JSON/CSV tolerant parser
+    function tryParse(jsonOrCsv){
+      try {
+        const obj = JSON.parse(jsonOrCsv);
+        if (Array.isArray(obj)) return { kind:'json', rows: obj };
+        if (Array.isArray(obj?.records)) return { kind:'json', rows: obj.records };
+        for (const k of ['data','rows','items','result']){
+          if (Array.isArray(obj?.[k])) return { kind:'json', rows: obj[k] };
+        }
+        return { kind:'json', rows: [] };
+      } catch(e){ /* not json */ }
+      return { kind:'csv', rows: parseCSV(jsonOrCsv) };
+    }
+
+    function detectKeys(rows){
+      if(!rows.length) return { timeKey:null, numericKeys:[] };
+      const keys = Object.keys(rows[0] || {});
+      // tijd
+      const timeCandidates = ['time','period','date','TIME','TIME_PERIOD','year'];
+      const timeKey = keys.find(k=> timeCandidates.includes(k)) || keys.find(k=> /time|period|date|year/i.test(k));
+      // numeriek (robust: spaties/komma's)
+      const toNum = (v)=>{
+        if (v==null) return NaN;
+        if (typeof v === 'number') return v;
+        if (typeof v !== 'string') return Number(v);
+        const s = v.replace(/\s+/g,'').replace(',', '.');
+        const n = Number(s);
+        return Number.isFinite(n) ? n : NaN;
+      };
+      const numericKeys = keys.filter(k=> rows.some(r=> Number.isFinite(toNum(r[k])) ));
+      return { timeKey, numericKeys: numericKeys.filter(k=>k!==timeKey) };
+    }
+
+    function normalize(rows, timeKey, seriesKey){
+      const toDate = (v)=>{
+        const s = String(v ?? '').trim();
+        if (/^\d{4}-\d{2}$/.test(s)) return new Date(`${s}-01T00:00:00Z`);
+        if (/^\d{4}$/.test(s)) return new Date(`${s}-01-01T00:00:00Z`);
+        let m = s.match(/^(\d{4})-?Q([1-4])$/) || s.match(/^Q([1-4])-(\d{4})$/);
+        if (m){ const year = m[2]?m[2]:m[1]; const q = m[2]?m[1]:m[2]; const month = (Number(q)-1)*3 + 1; return new Date(`${year}-${String(month).padStart(2,'0')}-01T00:00:00Z`); }
+        m = s.match(/^(\d{4})M(\d{1,2})$/);
+        if (m) return new Date(`${m[1]}-${String(m[2]).padStart(2,'0')}-01T00:00:00Z`);
+        m = s.match(/^(\d{4})(\d{2})$/);
+        if (m) return new Date(`${m[1]}-${m[2]}-01T00:00:00Z`);
+        const d = new Date(s);
+        return isNaN(d) ? null : d;
+      };
+      const toNum = (v)=>{
+        if (v==null) return NaN;
+        if (typeof v === 'number') return v;
+        if (typeof v !== 'string') return Number(v);
+        const s = v.replace(/\s+/g,'').replace(',', '.');
+        const n = Number(s);
+        return Number.isFinite(n) ? n : NaN;
+      };
+      const pts = rows.map(r=>({ x: toDate(r[timeKey]), y: toNum(r[seriesKey]), raw:r }))
+                      .filter(p=> p.x instanceof Date && !isNaN(p.x) && Number.isFinite(p.y))
+                      .sort((a,b)=> a.x - b.x);
+      return pts;
+    }
+
+    function renderChart(points, label){
+      const ctx = document.getElementById('chart');
+      const data = { datasets: [{ label, data: points.map(p=>({x:p.x, y:p.y})), tension:.2 }] };
+      const options = {
+        responsive:true, parsing:false,
+        scales:{ x:{ type:'time', time:{ unit:'month' } }, y:{ beginAtZero:true, suggestedMin:0 } },
+        plugins:{ legend:{ display:true }, tooltip:{ callbacks:{ label:(c)=> `${c.parsed.y}` } } }
+      };
+      if(!window._chartTimeLoaded){
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3';
+        document.head.appendChild(s);
+        window._chartTimeLoaded = true;
+      }
+      if (window.CHART) window.CHART.destroy();
+      window.CHART = new Chart(ctx, { type:'line', data, options });
+    }
+
+    function renderTable(points){
+      const fmt = new Intl.DateTimeFormat('en-CA',{year:'numeric',month:'2-digit',day:'2-digit'});
+      let html = '<table><thead><tr><th>periode</th><th>waarde</th></tr></thead><tbody>';
+      html += points.map(p=> `<tr><td>${fmt.format(p.x).slice(0,7)}</td><td>${p.y}</td></tr>`).join('');
+      html += '</tbody></table>';
+      tableWrap.innerHTML = html;
+    }
+
+    async function load(url){
+      setMessage('Laden…');
+      try{
+        const raw = await fetchText(url);
+        const parsed = tryParse(raw);
+        const rows = parsed.rows;
+        if(!Array.isArray(rows) || rows.length===0) throw new Error('Lege of ongeldige dataset.');
+
+        const { timeKey, numericKeys } = detectKeys(rows);
+        if (!numericKeys.length) throw new Error('Geen numerieke kolommen gevonden.');
+
+        // dropdown (kies liever value_pct_gdp / value / OBS_VALUE)
+        const preferred = ['value_pct_gdp','value','OBS_VALUE'];
+        const defaultKey = numericKeys.find(k=> preferred.includes(k)) || numericKeys[0];
+        seriesKeySelect.innerHTML = numericKeys.map(k=>`<option value="${k}" ${k===defaultKey?'selected':''}>${k}</option>`).join('');
+        const chosen = seriesKeySelect.value || defaultKey;
+
+        const pts = normalize(rows, timeKey, chosen);
+        if (!pts.length) throw new Error('Kon geen tijdreeks afleiden uit de data.');
+
+        renderChart(pts, chosen);
+        renderTable(pts);
+        meta.innerHTML = `Bron: <code>${url}</code><br>Records: <b>${rows.length}</b> · Tijdskey: <code>${timeKey||'n/a'}</code> · Waardekey: <code>${chosen}</code>`;
         setMessage('');
-        return;
+      }catch(err){
+        console.error(err);
+        setMessage('Fout: '+ err.message, 'error');
       }
     }
 
-    throw new Error('Kon geen visual renderen (controleer kolomnamen).');
-  }catch(err){ console.error(err); setMessage('Fout: '+ err.message, 'error'); }
-}
+    // UI
+    document.getElementById('loadBtn').addEventListener('click', ()=> load(dataUrlInput.value || DEFAULT_DATA));
+    seriesKeySelect.addEventListener('change', ()=> document.getElementById('loadBtn').click());
 
-// Wire
-document.getElementById('loadBtn').addEventListener('click', ()=> load(dataUrlInput.value || DEFAULT_DATA));
-seriesKeySelect.addEventListener('change', ()=> document.getElementById('loadBtn').click());
-
-// Boot
-dataUrlInput.value = DEFAULT_DATA; load(DEFAULT_DATA);
+    // Boot
+    dataUrlInput.value = DEFAULT_DATA;
+    load(DEFAULT_DATA);

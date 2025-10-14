@@ -1,11 +1,10 @@
-<!-- FILE: index.html (v3.4) -->
 <!doctype html>
 <html lang="nl">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Eufacts • TEINA230 — Visual</title>
-  <meta name="description" content="Eufacts viewer — volledige landennamen, duidelijke titels/ondertitels, EA/EU glossary, zero‑baseline." />
+  <title>Eufacts • teina230 — Visual MVP</title>
+  <meta name="description" content="Eufacts MVP: minimal, fast visual for Eurostat teina230 dataset" />
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script defer src="./app.js"></script>
@@ -31,15 +30,13 @@
     .foot{color:var(--muted); font-size:12px}
     .error{color:#b91c1c; background:#fef2f2; border:1px solid #fee2e2; padding:10px; border-radius:10px}
     kbd{background:#e2e8f0; padding:2px 6px; border-radius:6px; font-size:12px}
-    .gloss{margin-top:10px; font-size:12px; color:var(--muted)}
-    .gloss code{font-size:12px}
   </style>
 </head>
 <body>
   <header>
     <div class="wrap">
-      <h1>Eufacts — <span class="badge">TEINA230</span> Visual</h1>
-      <div class="sub">Één periode ⇒ landenranglijst (bar). Meerdere periodes ⇒ tijdreeks. Zero‑baseline. Volledige landennamen + uitleg van EA/EU labels onderaan.</div>
+      <h1>Eufacts — <span class="badge">teina230</span> Visual MVP</h1>
+      <div class="sub">Laadt JSON/CSV uit <code>data/latest/</code> en toont een tijdreeks + tabel. Gebruik <kbd>?data=</kbd> voor een ander pad.</div>
     </div>
   </header>
 
@@ -62,7 +59,7 @@
 
     <section class="grid">
       <div class="card">
-        <canvas id="chart" height="180"></canvas>
+        <canvas id="chart" height="160"></canvas>
       </div>
       <div class="card">
         <div id="meta" class="foot"></div>
@@ -71,10 +68,7 @@
 
     <section class="card">
       <div id="tableWrap"></div>
-      <div id="glossary" class="gloss"></div>
     </section>
-
-    <p class="foot">Publiceer als <code>index.html</code> (of in <code>site/</code>). Zet GitHub Pages aan. Default dataset: <code>./data/latest/teina230.json</code>. Timeseries kan via <code>?data=./data/latest/teina230-timeseries.json</code> (of underscore-variant).</p>
 
     <div id="msg" class="foot"></div>
   </main>

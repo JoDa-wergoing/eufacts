@@ -21,7 +21,6 @@ async function fetchText(url){
   if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
   return await res.text();
 }
-// CSV → objects
 function parseCSV(text){
   const lines = text.trim().split(/\r?\n/);
   if (!lines.length) return [];
@@ -33,16 +32,6 @@ function parseCSV(text){
     return obj;
   });
 }
-// tolerant parser → always return an object with .rows
-function tryParse(jsonOrCsv){
-  try {
-    const obj = JSON.parse(jsonOrCsv);
-    return { json: obj, rows: objectJsonToRows(obj) ?? [] };
-  } catch(e){
-    return { json: null, rows: parseCSV(jsonOrCsv) };
-  }
-}
-// robust number parsing
 function toNum(v){
   if (v == null) return NaN;
   if (typeof v === 'number') return v;
@@ -51,16 +40,12 @@ function toNum(v){
   const n = Number(s);
   return Number.isFinite(n) ? n : NaN;
 }
-// parse time
 function parseTime(v){
   if (v==null) return null;
   const s = String(v).trim();
   let m;
   m = s.match(/^(\d{4})-?Q([1-4])$/) || s.match(/^Q([1-4])-(\d{4})$/);
-  if (m){ const year = m[2]?m[2]:m[1]; const q = m[2]?m[1]:m[2];
-    const month = (Number(q)-1)*3 + 1;
-    return new Date(`${year}-${String(month).padStart(2,'0')}-01T00:00:00Z`);
-  }
+  if (m){ const year = m[2]?m[2]:m[1]; const q = m[2]?m[1]:m[2]; const month = (Number(q)-1)*3 + 1; return new Date(`${year}-${String(month).padStart(2,'0')}-01T00:00:00Z`); }
   m = s.match(/^(\d{4})-(\d{1,2})$/); if (m) return new Date(`${m[1]}-${String(m[2]).padStart(2,'0')}-01T00:00:00Z`);
   m = s.match(/^(\d{4})M(\d{1,2})$/); if (m) return new Date(`${m[1]}-${String(m[2]).padStart(2,'0')}-01T00:00:00Z`);
   m = s.match(/^(\d{4})(\d{2})$/);    if (m) return new Date(`${m[1]}-${m[2]}-01T00:00:00Z`);
@@ -69,58 +54,70 @@ function parseTime(v){
   return isNaN(d) ? null : d;
 }
 
-// ---- JSON flattener ----
-// Supports:
-//  A) { records: [{time, value_*, country*}, ...] }  (cross-section per tijdstip)
-//  B) { records: [{country*, series:[{time, value_*}, ...]} ...] }  (timeseries genest per land)
-//  C) Arrays, or {data|rows|items|result:[...]}, CSV → al vlak
+// ---- JSON → rows ----
 function objectJsonToRows(obj){
-  if (!obj) return null;
-
-  // direct arrays or common keys
+  // Direct array
   if (Array.isArray(obj)) return obj;
+
+  // Common containers
   for (const k of ['data','rows','items','result']){
-    if (Array.isArray(obj[k])) return obj[k];
+    if (Array.isArray(obj?.[k])) return obj[k];
   }
 
-  if (Array.isArray(obj.records)){
-    const rec0 = obj.records[0] || {};
-
-    // B) geneste timeseries
-    if (Array.isArray(rec0.series)){
-      const out = [];
-      for (const rec of obj.records){
-        const base = {
-          country: rec.country ?? rec.name ?? rec.geo_label ?? rec.country_name ?? undefined,
-          country_code: rec.country_code ?? rec.geo ?? undefined,
-          unit: rec.unit ?? obj.unit
-        };
-        for (const pt of rec.series || []){
-          const flat = { ...base, ...pt };
-          // Zorg dat key-namen uniform zijn
-          if (flat.value === undefined && flat.OBS_VALUE !== undefined) flat.value = flat.OBS_VALUE;
-          out.push(flat);
+  // records[].series[]  (timeseries per land)
+  if (Array.isArray(obj?.records) && Array.isArray(obj.records[0]?.series)){
+    const out = [];
+    for (const rec of obj.records){
+      const base = {
+        country: rec.country ?? rec.name ?? rec.geo_label ?? rec.country_name ?? undefined,
+        country_code: rec.country_code ?? rec.geo ?? undefined,
+        unit: rec.unit ?? obj.unit
+      };
+      for (const pt of rec.series){
+        // uniform keys
+        const row = { ...base, time: pt.time, value: pt.value ?? pt.OBS_VALUE ?? pt.value_pct_gdp ?? pt.value_pct ?? pt.val };
+        // als 'value' nog leeg is, kijk expliciet naar value_pct_gdp
+        if (row.value === undefined && pt.value_pct_gdp !== undefined) row.value = pt.value_pct_gdp;
+        // neem ook alle numerieke keys mee (zodat je kunt kiezen in de dropdown)
+        const allKeys = Object.keys(pt);
+        for (const k of allKeys){
+          if (k !== 'time') row[k] = pt[k];
         }
+        out.push(row);
       }
-      return out;
     }
+    return out;
+  }
 
-    // A) cross-section (records met time + value_* op recordniveau)
-    const out = obj.records.map(r=>{
+  // records[] vlak (cross-section met time op record)
+  if (Array.isArray(obj?.records)){
+    return obj.records.map(r=>{
       const o = { ...r };
-      if (o.value === undefined && o.OBS_VALUE !== undefined) o.value = o.OBS_VALUE;
+      if (o.value === undefined){
+        if (o.OBS_VALUE !== undefined) o.value = o.OBS_VALUE;
+        else if (o.value_pct_gdp !== undefined) o.value = o.value_pct_gdp;
+      }
       return o;
     });
-    return out;
   }
 
   return null;
 }
 
+// ---- Parser ----
+function tryParse(jsonOrCsv){
+  try {
+    const obj = JSON.parse(jsonOrCsv);
+    const rows = objectJsonToRows(obj);
+    return { rows: Array.isArray(rows) ? rows : [] };
+  } catch(e){
+    return { rows: parseCSV(jsonOrCsv) };
+  }
+}
+
 // ---- Key detection ----
 function detectKeys(rows){
   if (!rows.length) return { timeKey:null, countryKey:null, numericKeys:[] };
-
   const keys = Object.keys(rows[0] || {});
   const timeKey =
     keys.find(k=> ['time','TIME_PERIOD','period','date','year'].includes(k)) ||
@@ -130,33 +127,44 @@ function detectKeys(rows){
     keys.find(k=> ['country','country_name','name','geo_label','country_code','geo','GEO'].includes(k)) ||
     keys.find(k=> /country|geo/i.test(k)) || null;
 
-  // welke keys zijn numeriek?
   const numericKeys = keys.filter(k => rows.some(r => Number.isFinite(toNum(r[k])) ));
   const filteredNumeric = numericKeys.filter(k => k !== timeKey && k !== countryKey);
 
   return { timeKey, countryKey, numericKeys: filteredNumeric };
 }
 
+// ---- Shape / helpers ----
 function unique(arr){ return [...new Set(arr)]; }
 function summarizeShape(rows, timeKey){
   const times = unique(rows.map(r => timeKey ? String(r[timeKey]) : '').filter(Boolean));
   return { times, singlePeriod: times.length === 1, period: times[0] || null };
 }
+function pickGeo(rows, countryKey){
+  if (!countryKey) return null;
+  const geos = unique(rows.map(r => r[countryKey]).filter(Boolean).map(String));
+  const prio = ['EU27_2020','EA20','EA19','EU28','EU27'];
+  return prio.find(p => geos.includes(p)) || geos[0] || null;
+}
 
-// ---- Build series ----
+// ---- Build series / tables ----
+function prettyMetricName(key){
+  const map = {
+    value_pct_gdp: 'General government gross debt (% of GDP)',
+    value: 'Value',
+    OBS_VALUE: 'Observed value'
+  };
+  return map[key] || String(key).replace(/_/g,' ').replace(/\b\w/g, c=>c.toUpperCase());
+}
 function labelForRow(r){
   return r.country ?? r.country_name ?? r.name ?? r.geo_label ?? r.country_code ?? r.geo ?? '?';
 }
-const PRETTY = {
-  value_pct_gdp: 'General government gross debt (% of GDP)',
-  value: 'Value',
-  OBS_VALUE: 'Observed value'
-};
-function prettyMetricName(key){
-  return PRETTY[key] || String(key).replace(/_/g,' ').replace(/\b\w/g, c=>c.toUpperCase());
-}
 function buildTimeSeries(rows, timeKey, valueKey, countryKey){
-  const pts = rows
+  let useRows = rows;
+  if (countryKey){
+    const chosen = pickGeo(rows, countryKey);
+    if (chosen) useRows = rows.filter(r => String(r[countryKey]) === chosen);
+  }
+  const pts = useRows
     .map(r => ({ x: parseTime(r[timeKey]), y: toNum(r[valueKey]) }))
     .filter(p => p.x instanceof Date && !isNaN(p.x) && Number.isFinite(p.y))
     .sort((a,b) => a.x - b.x);
@@ -222,14 +230,12 @@ async function load(url){
   setMessage('Laden…');
   try{
     const raw = await fetchText(url);
-    const parsed = tryParse(raw);
-    const rows = parsed.rows;
+    const { rows } = tryParse(raw);
     if (!Array.isArray(rows) || !rows.length) throw new Error('Lege of ongeldige dataset.');
 
     const { timeKey, countryKey, numericKeys } = detectKeys(rows);
     if (!numericKeys.length) throw new Error('Geen numerieke kolommen gevonden.');
 
-    // voorkeurskolommen
     const preferred = ['value_pct_gdp','value','OBS_VALUE'];
     const defaultKey = numericKeys.find(k => preferred.includes(k)) || numericKeys[0];
 
@@ -249,9 +255,9 @@ async function load(url){
     }
 
     if (timeKey){
+      await ensureTimeAdapter();
       const pts = buildTimeSeries(rows, timeKey, valueKey, countryKey);
       if (!pts.length) throw new Error('Kon geen tijdreeks afleiden uit de data.');
-      await ensureTimeAdapter();
       renderLine(pts, valueKey);
       renderTableFromPoints(pts);
       meta.innerHTML = `Bron: <code>${url}</code> · Records: <b>${rows.length}</b> · Waarde: <code>${valueKey}</code>`;

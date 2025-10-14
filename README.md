@@ -93,10 +93,10 @@ Open discussions or improvement ideas via [Issues](../../issues).
 ---
 
 ## 🌍 Links
-- Website: [https://eufacts.eu](https://eufacts.eu) *(coming soon)*  
+- Website:*(coming soon)*  
 - Project Board: [EUFacts-MVP](../../projects)  
 - Data Portal (API): *(in development)*  
-- Contact: `info@eufacts.eu`
+- Contact: `info@wergoing.com`
 
 ---
 

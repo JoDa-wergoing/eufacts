@@ -1,0 +1,1664 @@
+{
+  "dataset": "TEINA230",
+  "description": "General government gross debt, % of GDP (quarterly, last 12 quarters)",
+  "source_url": "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/teina230?lastTimePeriod=12",
+  "updated_at": "2025-10-14T04:23:46.227957+00:00",
+  "unit": "% of GDP",
+  "latest_period": "2025-Q1",
+  "records": [
+    {
+      "country_code": "AT",
+      "country": "Austria",
+      "unit": "% of GDP",
+      "series": [
+        {
+          "time": "2022-Q2",
+          "value_pct_gdp": 82.5
+        },
+        {
+          "time": "2022-Q3",
+          "value_pct_gdp": 81.0
+        },
+        {
+          "time": "2022-Q4",
+          "value_pct_gdp": 78.4
+        },
+        {
+          "time": "2023-Q1",
+          "value_pct_gdp": 79.9
+        },
+        {
+          "time": "2023-Q2",
+          "value_pct_gdp": 78.4
+        },
+        {
+          "time": "2023-Q3",
+          "value_pct_gdp": 78.6
+        },
+        {
+          "time": "2023-Q4",
+          "value_pct_gdp": 78.5
+        },
+        {
+          "time": "2024-Q1",
+          "value_pct_gdp": 80.8
+        },
+        {
+          "time": "2024-Q2",
+          "value_pct_gdp": 82.8
+        },
+        {
+          "time": "2024-Q3",
+          "value_pct_gdp": 83.0
+        },
+        {
+          "time": "2024-Q4",
+          "value_pct_gdp": 81.4
+        },
+        {
+          "time": "2025-Q1",
+          "value_pct_gdp": 84.9
+        }
+      ]
+    },
+    {
+      "country_code": "BE",
+      "country": "Belgium",
+      "unit": "% of GDP",
+      "series": [
+        {
+          "time": "2022-Q2",
+          "value_pct_gdp": 107.4
+        },
+        {
+          "time": "2022-Q3",
+          "value_pct_gdp": 104.7
+        },
+        {
+          "time": "2022-Q4",
+          "value_pct_gdp": 102.7
+        },
+        {
+          "time": "2023-Q1",
+          "value_pct_gdp": 104.1
+        },
+        {
+          "time": "2023-Q2",
+          "value_pct_gdp": 103.3
+        },
+        {
+          "time": "2023-Q3",
+          "value_pct_gdp": 105.4
+        },
+        {
+          "time": "2023-Q4",
+          "value_pct_gdp": 103.2
+        },
+        {
+          "time": "2024-Q1",
+          "value_pct_gdp": 106.6
+        },
+        {
+          "time": "2024-Q2",
+          "value_pct_gdp": 106.6
+        },
+        {
+          "time": "2024-Q3",
+          "value_pct_gdp": 105.7
+        },
+        {
+          "time": "2024-Q4",
+          "value_pct_gdp": 104.7
+        },
+        {
+          "time": "2025-Q1",
+          "value_pct_gdp": 106.8
+        }
+      ]
+    },
+    {
+      "country_code": "BG",
+      "country": "Bulgaria",
+      "unit": "% of GDP",
+      "series": [
+        {
+          "time": "2022-Q2",
+          "value_pct_gdp": 21.2
+        },
+        {
+          "time": "2022-Q3",
+          "value_pct_gdp": 23.0
+        },
+        {
+          "time": "2022-Q4",
+          "value_pct_gdp": 22.5
+        },
+        {
+          "time": "2023-Q1",
+          "value_pct_gdp": 22.2
+        },
+        {
+          "time": "2023-Q2",
+          "value_pct_gdp": 21.5
+        },
+        {
+          "time": "2023-Q3",
+          "value_pct_gdp": 20.9
+        },
+        {
+          "time": "2023-Q4",
+          "value_pct_gdp": 22.9
+        },
+        {
+          "time": "2024-Q1",
+          "value_pct_gdp": 22.4
+        },
+        {
+          "time": "2024-Q2",
+          "value_pct_gdp": 22.1
+        },
+        {
+          "time": "2024-Q3",
+          "value_pct_gdp": 24.6
+        },
+        {
+          "time": "2024-Q4",
+          "value_pct_gdp": 24.1
+        },
+        {
+          "time": "2025-Q1",
+          "value_pct_gdp": 23.9
+        }
+      ]
+    },
+    {
+      "country_code": "CY",
+      "country": "Cyprus",
+      "unit": "% of GDP",
+      "series": [
+        {
+          "time": "2022-Q2",
+          "value_pct_gdp": 89.5
+        },
+        {
+          "time": "2022-Q3",
+          "value_pct_gdp": 85.4
+        },
+        {
+          "time": "2022-Q4",
+          "value_pct_gdp": 81.1
+        },
+        {
+          "time": "2023-Q1",
+          "value_pct_gdp": 78.6
+        },
+        {
+          "time": "2023-Q2",
+          "value_pct_gdp": 80.6
+        },
+        {
+          "time": "2023-Q3",
+          "value_pct_gdp": 75.1
+        },
+        {
+          "time": "2023-Q4",
+          "value_pct_gdp": 73.6
+        },
+        {
+          "time": "2024-Q1",
+          "value_pct_gdp": 72.5
+        },
+        {
+          "time": "2024-Q2",
+          "value_pct_gdp": 70.2
+        },
+        {
+          "time": "2024-Q3",
+          "value_pct_gdp": 69.2
+        },
+        {
+          "time": "2024-Q4",
+          "value_pct_gdp": 65.1
+        },
+        {
+          "time": "2025-Q1",
+          "value_pct_gdp": 64.3
+        }
+      ]
+    },
+    {
+      "country_code": "CZ",
+      "country": "Czechia",
+      "unit": "% of GDP",
+      "series": [
+        {
+          "time": "2022-Q2",
+          "value_pct_gdp": 41.9
+        },
+        {
+          "time": "2022-Q3",
+          "value_pct_gdp": 43.5
+        },
+        {
+          "time": "2022-Q4",
+          "value_pct_gdp": 42.5
+        },
+        {
+          "time": "2023-Q1",
+          "value_pct_gdp": 42.8
+        },
+        {
+          "time": "2023-Q2",
+          "value_pct_gdp": 42.5
+        },
+        {
+          "time": "2023-Q3",
+          "value_pct_gdp": 42.7
+        },
+        {
+          "time": "2023-Q4",
+          "value_pct_gdp": 42.2
+        },
+        {
+          "time": "2024-Q1",
+          "value_pct_gdp": 43.1
+        },
+        {
+          "time": "2024-Q2",
+          "value_pct_gdp": 42.4
+        },
+        {
+          "time": "2024-Q3",
+          "value_pct_gdp": 43.4
+        },
+        {
+          "time": "2024-Q4",
+          "value_pct_gdp": 43.3
+        },
+        {
+          "time": "2025-Q1",
+          "value_pct_gdp": 43.4
+        }
+      ]
+    },
+    {
+      "country_code": "DE",
+      "country": "Germany",
+      "unit": "% of GDP",
+      "series": [
+        {
+          "time": "2022-Q2",
+          "value_pct_gdp": 66.5
+        },
+        {
+          "time": "2022-Q3",
+          "value_pct_gdp": 65.7
+        },
+        {
+          "time": "2022-Q4",
+          "value_pct_gdp": 65.0
+        },
+        {
+          "time": "2023-Q1",
+          "value_pct_gdp": 64.6
+        },
+        {
+          "time": "2023-Q2",
+          "value_pct_gdp": 63.6
+        },
+        {
+          "time": "2023-Q3",
+          "value_pct_gdp": 63.8
+        },
+        {
+          "time": "2023-Q4",
+          "value_pct_gdp": 62.9
+        },
+        {
+          "time": "2024-Q1",
+          "value_pct_gdp": 62.6
+        },
+        {
+          "time": "2024-Q2",
+          "value_pct_gdp": 62.0
+        },
+        {
+          "time": "2024-Q3",
+          "value_pct_gdp": 62.4
+        },
+        {
+          "time": "2024-Q4",
+          "value_pct_gdp": 62.5
+        },
+        {
+          "time": "2025-Q1",
+          "value_pct_gdp": 62.3
+        }
+      ]
+    },
+    {
+      "country_code": "DK",
+      "country": "Denmark",
+      "unit": "% of GDP",
+      "series": [
+        {
+          "time": "2022-Q2",
+          "value_pct_gdp": 34.7
+        },
+        {
+          "time": "2022-Q3",
+          "value_pct_gdp": 33.7
+        },
+        {
+          "time": "2022-Q4",
+          "value_pct_gdp": 33.3
+        },
+        {
+          "time": "2023-Q1",
+          "value_pct_gdp": 33.2
+        },
+        {
+          "time": "2023-Q2",
+          "value_pct_gdp": 33.8
+        },
+        {
+          "time": "2023-Q3",
+          "value_pct_gdp": 33.7
+        },
+        {
+          "time": "2023-Q4",
+          "value_pct_gdp": 33.0
+        },
+        {
+          "time": "2024-Q1",
+          "value_pct_gdp": 33.1
+        },
+        {
+          "time": "2024-Q2",
+          "value_pct_gdp": 33.1
+        },
+        {
+          "time": "2024-Q3",
+          "value_pct_gdp": 32.7
+        },
+        {
+          "time": "2024-Q4",
+          "value_pct_gdp": 30.5
+        },
+        {
+          "time": "2025-Q1",
+          "value_pct_gdp": 29.9
+        }
+      ]
+    },
+    {
+      "country_code": "EA20",
+      "country": "Euro area – 20 countries (from 2023)",
+      "unit": "% of GDP",
+      "series": [
+        {
+          "time": "2022-Q2",
+          "value_pct_gdp": 92.4
+        },
+        {
+          "time": "2022-Q3",
+          "value_pct_gdp": 90.9
+        },
+        {
+          "time": "2022-Q4",
+          "value_pct_gdp": 89.5
+        },
+        {
+          "time": "2023-Q1",
+          "value_pct_gdp": 89.3
+        },
+        {
+          "time": "2023-Q2",
+          "value_pct_gdp": 88.8
+        },
+        {
+          "time": "2023-Q3",
+          "value_pct_gdp": 88.3
+        },
+        {
+          "time": "2023-Q4",
+          "value_pct_gdp": 87.3
+        },
+        {
+          "time": "2024-Q1",
+          "value_pct_gdp": 87.8
+        },
+        {
+          "time": "2024-Q2",
+          "value_pct_gdp": 88.0
+        },
+        {
+          "time": "2024-Q3",
+          "value_pct_gdp": 88.0
+        },
+        {
+          "time": "2024-Q4",
+          "value_pct_gdp": 87.4
+        },
+        {
+          "time": "2025-Q1",
+          "value_pct_gdp": 88.0
+        }
+      ]
+    },
+    {
+      "country_code": "EE",
+      "country": "Estonia",
+      "unit": "% of GDP",
+      "series": [
+        {
+          "time": "2022-Q2",
+          "value_pct_gdp": 17.6
+        },
+        {
+          "time": "2022-Q3",
+          "value_pct_gdp": 16.6
+        },
+        {
+          "time": "2022-Q4",
+          "value_pct_gdp": 19.1
+        },
+        {
+          "time": "2023-Q1",
+          "value_pct_gdp": 17.8
+        },
+        {
+          "time": "2023-Q2",
+          "value_pct_gdp": 19.0
+        },
+        {
+          "time": "2023-Q3",
+          "value_pct_gdp": 18.7
+        },
+        {
+          "time": "2023-Q4",
+          "value_pct_gdp": 20.2
+        },
+        {
+          "time": "2024-Q1",
+          "value_pct_gdp": 24.1
+        },
+        {
+          "time": "2024-Q2",
+          "value_pct_gdp": 23.8
+        },
+        {
+          "time": "2024-Q3",
+          "value_pct_gdp": 24.0
+        },
+        {
+          "time": "2024-Q4",
+          "value_pct_gdp": 23.6
+        },
+        {
+          "time": "2025-Q1",
+          "value_pct_gdp": 24.1
+        }
+      ]
+    },
+    {
+      "country_code": "EL",
+      "country": "Greece",
+      "unit": "% of GDP",
+      "series": [
+        {
+          "time": "2022-Q2",
+          "value_pct_gdp": 188.2
+        },
+        {
+          "time": "2022-Q3",
+          "value_pct_gdp": 181.6
+        },
+        {
+          "time": "2022-Q4",
+          "value_pct_gdp": 177.0
+        },
+        {
+          "time": "2023-Q1",
+          "value_pct_gdp": 173.5
+        },
+        {
+          "time": "2023-Q2",
+          "value_pct_gdp": 171.0
+        },
+        {
+          "time": "2023-Q3",
+          "value_pct_gdp": 168.5
+        },
+        {
+          "time": "2023-Q4",
+          "value_pct_gdp": 163.9
+        },
+        {
+          "time": "2024-Q1",
+          "value_pct_gdp": 161.8
+        },
+        {
+          "time": "2024-Q2",
+          "value_pct_gdp": 160.1
+        },
+        {
+          "time": "2024-Q3",
+          "value_pct_gdp": 158.3
+        },
+        {
+          "time": "2024-Q4",
+          "value_pct_gdp": 153.6
+        },
+        {
+          "time": "2025-Q1",
+          "value_pct_gdp": 152.5
+        }
+      ]
+    },
+    {
+      "country_code": "ES",
+      "country": "Spain",
+      "unit": "% of GDP",
+      "series": [
+        {
+          "time": "2022-Q2",
+          "value_pct_gdp": 113.0
+        },
+        {
+          "time": "2022-Q3",
+          "value_pct_gdp": 112.2
+        },
+        {
+          "time": "2022-Q4",
+          "value_pct_gdp": 109.5
+        },
+        {
+          "time": "2023-Q1",
+          "value_pct_gdp": 109.0
+        },
+        {
+          "time": "2023-Q2",
+          "value_pct_gdp": 108.8
+        },
+        {
+          "time": "2023-Q3",
+          "value_pct_gdp": 107.4
+        },
+        {
+          "time": "2023-Q4",
+          "value_pct_gdp": 105.1
+        },
+        {
+          "time": "2024-Q1",
+          "value_pct_gdp": 106.3
+        },
+        {
+          "time": "2024-Q2",
+          "value_pct_gdp": 105.3
+        },
+        {
+          "time": "2024-Q3",
+          "value_pct_gdp": 104.4
+        },
+        {
+          "time": "2024-Q4",
+          "value_pct_gdp": 101.8
+        },
+        {
+          "time": "2025-Q1",
+          "value_pct_gdp": 103.5
+        }
+      ]
+    },
+    {
+      "country_code": "EU27_2020",
+      "country": "European Union - 27 countries (from 2020)",
+      "unit": "% of GDP",
+      "series": [
+        {
+          "time": "2022-Q2",
+          "value_pct_gdp": 85.1
+        },
+        {
+          "time": "2022-Q3",
+          "value_pct_gdp": 83.7
+        },
+        {
+          "time": "2022-Q4",
+          "value_pct_gdp": 82.5
+        },
+        {
+          "time": "2023-Q1",
+          "value_pct_gdp": 82.4
+        },
+        {
+          "time": "2023-Q2",
+          "value_pct_gdp": 82.0
+        },
+        {
+          "time": "2023-Q3",
+          "value_pct_gdp": 81.5
+        },
+        {
+          "time": "2023-Q4",
+          "value_pct_gdp": 80.8
+        },
+        {
+          "time": "2024-Q1",
+          "value_pct_gdp": 81.2
+        },
+        {
+          "time": "2024-Q2",
+          "value_pct_gdp": 81.5
+        },
+        {
+          "time": "2024-Q3",
+          "value_pct_gdp": 81.5
+        },
+        {
+          "time": "2024-Q4",
+          "value_pct_gdp": 81.0
+        },
+        {
+          "time": "2025-Q1",
+          "value_pct_gdp": 81.8
+        }
+      ]
+    },
+    {
+      "country_code": "FI",
+      "country": "Finland",
+      "unit": "% of GDP",
+      "series": [
+        {
+          "time": "2022-Q2",
+          "value_pct_gdp": 73.2
+        },
+        {
+          "time": "2022-Q3",
+          "value_pct_gdp": 72.5
+        },
+        {
+          "time": "2022-Q4",
+          "value_pct_gdp": 74.0
+        },
+        {
+          "time": "2023-Q1",
+          "value_pct_gdp": 73.5
+        },
+        {
+          "time": "2023-Q2",
+          "value_pct_gdp": 74.6
+        },
+        {
+          "time": "2023-Q3",
+          "value_pct_gdp": 74.6
+        },
+        {
+          "time": "2023-Q4",
+          "value_pct_gdp": 77.1
+        },
+        {
+          "time": "2024-Q1",
+          "value_pct_gdp": 78.6
+        },
+        {
+          "time": "2024-Q2",
+          "value_pct_gdp": 80.7
+        },
+        {
+          "time": "2024-Q3",
+          "value_pct_gdp": 82.2
+        },
+        {
+          "time": "2024-Q4",
+          "value_pct_gdp": 82.1
+        },
+        {
+          "time": "2025-Q1",
+          "value_pct_gdp": 83.7
+        }
+      ]
+    },
+    {
+      "country_code": "FR",
+      "country": "France",
+      "unit": "% of GDP",
+      "series": [
+        {
+          "time": "2022-Q2",
+          "value_pct_gdp": 112.9
+        },
+        {
+          "time": "2022-Q3",
+          "value_pct_gdp": 113.1
+        },
+        {
+          "time": "2022-Q4",
+          "value_pct_gdp": 111.4
+        },
+        {
+          "time": "2023-Q1",
+          "value_pct_gdp": 111.9
+        },
+        {
+          "time": "2023-Q2",
+          "value_pct_gdp": 111.3
+        },
+        {
+          "time": "2023-Q3",
+          "value_pct_gdp": 111.2
+        },
+        {
+          "time": "2023-Q4",
+          "value_pct_gdp": 109.8
+        },
+        {
+          "time": "2024-Q1",
+          "value_pct_gdp": 110.6
+        },
+        {
+          "time": "2024-Q2",
+          "value_pct_gdp": 112.3
+        },
+        {
+          "time": "2024-Q3",
+          "value_pct_gdp": 113.6
+        },
+        {
+          "time": "2024-Q4",
+          "value_pct_gdp": 113.2
+        },
+        {
+          "time": "2025-Q1",
+          "value_pct_gdp": 114.1
+        }
+      ]
+    },
+    {
+      "country_code": "HR",
+      "country": "Croatia",
+      "unit": "% of GDP",
+      "series": [
+        {
+          "time": "2022-Q2",
+          "value_pct_gdp": 72.9
+        },
+        {
+          "time": "2022-Q3",
+          "value_pct_gdp": 70.2
+        },
+        {
+          "time": "2022-Q4",
+          "value_pct_gdp": 68.5
+        },
+        {
+          "time": "2023-Q1",
+          "value_pct_gdp": 69.1
+        },
+        {
+          "time": "2023-Q2",
+          "value_pct_gdp": 65.8
+        },
+        {
+          "time": "2023-Q3",
+          "value_pct_gdp": 63.3
+        },
+        {
+          "time": "2023-Q4",
+          "value_pct_gdp": 61.8
+        },
+        {
+          "time": "2024-Q1",
+          "value_pct_gdp": 62.0
+        },
+        {
+          "time": "2024-Q2",
+          "value_pct_gdp": 60.0
+        },
+        {
+          "time": "2024-Q3",
+          "value_pct_gdp": 59.6
+        },
+        {
+          "time": "2024-Q4",
+          "value_pct_gdp": 57.6
+        },
+        {
+          "time": "2025-Q1",
+          "value_pct_gdp": 58.4
+        }
+      ]
+    },
+    {
+      "country_code": "HU",
+      "country": "Hungary",
+      "unit": "% of GDP",
+      "series": [
+        {
+          "time": "2022-Q2",
+          "value_pct_gdp": 76.4
+        },
+        {
+          "time": "2022-Q3",
+          "value_pct_gdp": 75.4
+        },
+        {
+          "time": "2022-Q4",
+          "value_pct_gdp": 73.9
+        },
+        {
+          "time": "2023-Q1",
+          "value_pct_gdp": 75.1
+        },
+        {
+          "time": "2023-Q2",
+          "value_pct_gdp": 74.7
+        },
+        {
+          "time": "2023-Q3",
+          "value_pct_gdp": 74.3
+        },
+        {
+          "time": "2023-Q4",
+          "value_pct_gdp": 73.0
+        },
+        {
+          "time": "2024-Q1",
+          "value_pct_gdp": 75.6
+        },
+        {
+          "time": "2024-Q2",
+          "value_pct_gdp": 75.5
+        },
+        {
+          "time": "2024-Q3",
+          "value_pct_gdp": 75.6
+        },
+        {
+          "time": "2024-Q4",
+          "value_pct_gdp": 73.5
+        },
+        {
+          "time": "2025-Q1",
+          "value_pct_gdp": 75.3
+        }
+      ]
+    },
+    {
+      "country_code": "IE",
+      "country": "Ireland",
+      "unit": "% of GDP",
+      "series": [
+        {
+          "time": "2022-Q2",
+          "value_pct_gdp": 49.0
+        },
+        {
+          "time": "2022-Q3",
+          "value_pct_gdp": 47.0
+        },
+        {
+          "time": "2022-Q4",
+          "value_pct_gdp": 43.2
+        },
+        {
+          "time": "2023-Q1",
+          "value_pct_gdp": 42.2
+        },
+        {
+          "time": "2023-Q2",
+          "value_pct_gdp": 41.8
+        },
+        {
+          "time": "2023-Q3",
+          "value_pct_gdp": 42.0
+        },
+        {
+          "time": "2023-Q4",
+          "value_pct_gdp": 42.1
+        },
+        {
+          "time": "2024-Q1",
+          "value_pct_gdp": 41.1
+        },
+        {
+          "time": "2024-Q2",
+          "value_pct_gdp": 40.8
+        },
+        {
+          "time": "2024-Q3",
+          "value_pct_gdp": 40.3
+        },
+        {
+          "time": "2024-Q4",
+          "value_pct_gdp": 38.7
+        },
+        {
+          "time": "2025-Q1",
+          "value_pct_gdp": 34.9
+        }
+      ]
+    },
+    {
+      "country_code": "IT",
+      "country": "Italy",
+      "unit": "% of GDP",
+      "series": [
+        {
+          "time": "2022-Q2",
+          "value_pct_gdp": 143.9
+        },
+        {
+          "time": "2022-Q3",
+          "value_pct_gdp": 139.9
+        },
+        {
+          "time": "2022-Q4",
+          "value_pct_gdp": 138.3
+        },
+        {
+          "time": "2023-Q1",
+          "value_pct_gdp": 137.2
+        },
+        {
+          "time": "2023-Q2",
+          "value_pct_gdp": 137.8
+        },
+        {
+          "time": "2023-Q3",
+          "value_pct_gdp": 135.5
+        },
+        {
+          "time": "2023-Q4",
+          "value_pct_gdp": 134.6
+        },
+        {
+          "time": "2024-Q1",
+          "value_pct_gdp": 134.9
+        },
+        {
+          "time": "2024-Q2",
+          "value_pct_gdp": 136.6
+        },
+        {
+          "time": "2024-Q3",
+          "value_pct_gdp": 136.2
+        },
+        {
+          "time": "2024-Q4",
+          "value_pct_gdp": 135.3
+        },
+        {
+          "time": "2025-Q1",
+          "value_pct_gdp": 137.9
+        }
+      ]
+    },
+    {
+      "country_code": "LT",
+      "country": "Lithuania",
+      "unit": "% of GDP",
+      "series": [
+        {
+          "time": "2022-Q2",
+          "value_pct_gdp": 39.1
+        },
+        {
+          "time": "2022-Q3",
+          "value_pct_gdp": 37.0
+        },
+        {
+          "time": "2022-Q4",
+          "value_pct_gdp": 38.1
+        },
+        {
+          "time": "2023-Q1",
+          "value_pct_gdp": 37.8
+        },
+        {
+          "time": "2023-Q2",
+          "value_pct_gdp": 37.7
+        },
+        {
+          "time": "2023-Q3",
+          "value_pct_gdp": 36.7
+        },
+        {
+          "time": "2023-Q4",
+          "value_pct_gdp": 37.3
+        },
+        {
+          "time": "2024-Q1",
+          "value_pct_gdp": 39.1
+        },
+        {
+          "time": "2024-Q2",
+          "value_pct_gdp": 37.4
+        },
+        {
+          "time": "2024-Q3",
+          "value_pct_gdp": 38.4
+        },
+        {
+          "time": "2024-Q4",
+          "value_pct_gdp": 38.2
+        },
+        {
+          "time": "2025-Q1",
+          "value_pct_gdp": 40.6
+        }
+      ]
+    },
+    {
+      "country_code": "LU",
+      "country": "Luxembourg",
+      "unit": "% of GDP",
+      "series": [
+        {
+          "time": "2022-Q2",
+          "value_pct_gdp": 25.4
+        },
+        {
+          "time": "2022-Q3",
+          "value_pct_gdp": 24.9
+        },
+        {
+          "time": "2022-Q4",
+          "value_pct_gdp": 24.9
+        },
+        {
+          "time": "2023-Q1",
+          "value_pct_gdp": 28.5
+        },
+        {
+          "time": "2023-Q2",
+          "value_pct_gdp": 28.1
+        },
+        {
+          "time": "2023-Q3",
+          "value_pct_gdp": 25.5
+        },
+        {
+          "time": "2023-Q4",
+          "value_pct_gdp": 25.0
+        },
+        {
+          "time": "2024-Q1",
+          "value_pct_gdp": 26.4
+        },
+        {
+          "time": "2024-Q2",
+          "value_pct_gdp": 26.1
+        },
+        {
+          "time": "2024-Q3",
+          "value_pct_gdp": 25.8
+        },
+        {
+          "time": "2024-Q4",
+          "value_pct_gdp": 26.3
+        },
+        {
+          "time": "2025-Q1",
+          "value_pct_gdp": 26.1
+        }
+      ]
+    },
+    {
+      "country_code": "LV",
+      "country": "Latvia",
+      "unit": "% of GDP",
+      "series": [
+        {
+          "time": "2022-Q2",
+          "value_pct_gdp": 44.4
+        },
+        {
+          "time": "2022-Q3",
+          "value_pct_gdp": 42.9
+        },
+        {
+          "time": "2022-Q4",
+          "value_pct_gdp": 44.4
+        },
+        {
+          "time": "2023-Q1",
+          "value_pct_gdp": 46.5
+        },
+        {
+          "time": "2023-Q2",
+          "value_pct_gdp": 42.2
+        },
+        {
+          "time": "2023-Q3",
+          "value_pct_gdp": 44.0
+        },
+        {
+          "time": "2023-Q4",
+          "value_pct_gdp": 44.6
+        },
+        {
+          "time": "2024-Q1",
+          "value_pct_gdp": 45.8
+        },
+        {
+          "time": "2024-Q2",
+          "value_pct_gdp": 45.9
+        },
+        {
+          "time": "2024-Q3",
+          "value_pct_gdp": 47.2
+        },
+        {
+          "time": "2024-Q4",
+          "value_pct_gdp": 46.8
+        },
+        {
+          "time": "2025-Q1",
+          "value_pct_gdp": 45.6
+        }
+      ]
+    },
+    {
+      "country_code": "MT",
+      "country": "Malta",
+      "unit": "% of GDP",
+      "series": [
+        {
+          "time": "2022-Q2",
+          "value_pct_gdp": 49.4
+        },
+        {
+          "time": "2022-Q3",
+          "value_pct_gdp": 49.1
+        },
+        {
+          "time": "2022-Q4",
+          "value_pct_gdp": 49.5
+        },
+        {
+          "time": "2023-Q1",
+          "value_pct_gdp": 49.3
+        },
+        {
+          "time": "2023-Q2",
+          "value_pct_gdp": 47.5
+        },
+        {
+          "time": "2023-Q3",
+          "value_pct_gdp": 47.2
+        },
+        {
+          "time": "2023-Q4",
+          "value_pct_gdp": 47.8
+        },
+        {
+          "time": "2024-Q1",
+          "value_pct_gdp": 47.5
+        },
+        {
+          "time": "2024-Q2",
+          "value_pct_gdp": 46.6
+        },
+        {
+          "time": "2024-Q3",
+          "value_pct_gdp": 45.9
+        },
+        {
+          "time": "2024-Q4",
+          "value_pct_gdp": 47.4
+        },
+        {
+          "time": "2025-Q1",
+          "value_pct_gdp": 48.1
+        }
+      ]
+    },
+    {
+      "country_code": "NL",
+      "country": "Netherlands",
+      "unit": "% of GDP",
+      "series": [
+        {
+          "time": "2022-Q2",
+          "value_pct_gdp": 48.6
+        },
+        {
+          "time": "2022-Q3",
+          "value_pct_gdp": 46.7
+        },
+        {
+          "time": "2022-Q4",
+          "value_pct_gdp": 48.4
+        },
+        {
+          "time": "2023-Q1",
+          "value_pct_gdp": 47.0
+        },
+        {
+          "time": "2023-Q2",
+          "value_pct_gdp": 45.8
+        },
+        {
+          "time": "2023-Q3",
+          "value_pct_gdp": 45.0
+        },
+        {
+          "time": "2023-Q4",
+          "value_pct_gdp": 45.8
+        },
+        {
+          "time": "2024-Q1",
+          "value_pct_gdp": 44.6
+        },
+        {
+          "time": "2024-Q2",
+          "value_pct_gdp": 43.8
+        },
+        {
+          "time": "2024-Q3",
+          "value_pct_gdp": 42.6
+        },
+        {
+          "time": "2024-Q4",
+          "value_pct_gdp": 43.7
+        },
+        {
+          "time": "2025-Q1",
+          "value_pct_gdp": 43.2
+        }
+      ]
+    },
+    {
+      "country_code": "NO",
+      "country": "Norway",
+      "unit": "% of GDP",
+      "series": [
+        {
+          "time": "2022-Q2",
+          "value_pct_gdp": 34.0
+        },
+        {
+          "time": "2022-Q3",
+          "value_pct_gdp": 33.9
+        },
+        {
+          "time": "2022-Q4",
+          "value_pct_gdp": 36.3
+        },
+        {
+          "time": "2023-Q1",
+          "value_pct_gdp": 33.0
+        },
+        {
+          "time": "2023-Q2",
+          "value_pct_gdp": 32.0
+        },
+        {
+          "time": "2023-Q3",
+          "value_pct_gdp": 35.5
+        },
+        {
+          "time": "2023-Q4",
+          "value_pct_gdp": 44.4
+        },
+        {
+          "time": "2024-Q1",
+          "value_pct_gdp": 42.2
+        },
+        {
+          "time": "2024-Q2",
+          "value_pct_gdp": 43.5
+        },
+        {
+          "time": "2024-Q3",
+          "value_pct_gdp": 42.3
+        },
+        {
+          "time": "2024-Q4",
+          "value_pct_gdp": 55.1
+        },
+        {
+          "time": "2025-Q1",
+          "value_pct_gdp": 45.2
+        }
+      ]
+    },
+    {
+      "country_code": "PL",
+      "country": "Poland",
+      "unit": "% of GDP",
+      "series": [
+        {
+          "time": "2022-Q2",
+          "value_pct_gdp": 50.9
+        },
+        {
+          "time": "2022-Q3",
+          "value_pct_gdp": 49.8
+        },
+        {
+          "time": "2022-Q4",
+          "value_pct_gdp": 48.8
+        },
+        {
+          "time": "2023-Q1",
+          "value_pct_gdp": 47.9
+        },
+        {
+          "time": "2023-Q2",
+          "value_pct_gdp": 48.1
+        },
+        {
+          "time": "2023-Q3",
+          "value_pct_gdp": 48.5
+        },
+        {
+          "time": "2023-Q4",
+          "value_pct_gdp": 49.5
+        },
+        {
+          "time": "2024-Q1",
+          "value_pct_gdp": 51.3
+        },
+        {
+          "time": "2024-Q2",
+          "value_pct_gdp": 52.1
+        },
+        {
+          "time": "2024-Q3",
+          "value_pct_gdp": 53.3
+        },
+        {
+          "time": "2024-Q4",
+          "value_pct_gdp": 55.3
+        },
+        {
+          "time": "2025-Q1",
+          "value_pct_gdp": 57.4
+        }
+      ]
+    },
+    {
+      "country_code": "PT",
+      "country": "Portugal",
+      "unit": "% of GDP",
+      "series": [
+        {
+          "time": "2022-Q2",
+          "value_pct_gdp": 121.2
+        },
+        {
+          "time": "2022-Q3",
+          "value_pct_gdp": 117.4
+        },
+        {
+          "time": "2022-Q4",
+          "value_pct_gdp": 111.2
+        },
+        {
+          "time": "2023-Q1",
+          "value_pct_gdp": 111.1
+        },
+        {
+          "time": "2023-Q2",
+          "value_pct_gdp": 108.7
+        },
+        {
+          "time": "2023-Q3",
+          "value_pct_gdp": 106.2
+        },
+        {
+          "time": "2023-Q4",
+          "value_pct_gdp": 97.7
+        },
+        {
+          "time": "2024-Q1",
+          "value_pct_gdp": 99.1
+        },
+        {
+          "time": "2024-Q2",
+          "value_pct_gdp": 100.3
+        },
+        {
+          "time": "2024-Q3",
+          "value_pct_gdp": 97.1
+        },
+        {
+          "time": "2024-Q4",
+          "value_pct_gdp": 94.9
+        },
+        {
+          "time": "2025-Q1",
+          "value_pct_gdp": 96.4
+        }
+      ]
+    },
+    {
+      "country_code": "RO",
+      "country": "Romania",
+      "unit": "% of GDP",
+      "series": [
+        {
+          "time": "2022-Q2",
+          "value_pct_gdp": 48.4
+        },
+        {
+          "time": "2022-Q3",
+          "value_pct_gdp": 48.4
+        },
+        {
+          "time": "2022-Q4",
+          "value_pct_gdp": 47.9
+        },
+        {
+          "time": "2023-Q1",
+          "value_pct_gdp": 49.7
+        },
+        {
+          "time": "2023-Q2",
+          "value_pct_gdp": 48.8
+        },
+        {
+          "time": "2023-Q3",
+          "value_pct_gdp": 49.5
+        },
+        {
+          "time": "2023-Q4",
+          "value_pct_gdp": 48.9
+        },
+        {
+          "time": "2024-Q1",
+          "value_pct_gdp": 51.7
+        },
+        {
+          "time": "2024-Q2",
+          "value_pct_gdp": 51.2
+        },
+        {
+          "time": "2024-Q3",
+          "value_pct_gdp": 53.2
+        },
+        {
+          "time": "2024-Q4",
+          "value_pct_gdp": 54.8
+        },
+        {
+          "time": "2025-Q1",
+          "value_pct_gdp": 55.8
+        }
+      ]
+    },
+    {
+      "country_code": "SE",
+      "country": "Sweden",
+      "unit": "% of GDP",
+      "series": [
+        {
+          "time": "2022-Q2",
+          "value_pct_gdp": 34.6
+        },
+        {
+          "time": "2022-Q3",
+          "value_pct_gdp": 35.0
+        },
+        {
+          "time": "2022-Q4",
+          "value_pct_gdp": 34.2
+        },
+        {
+          "time": "2023-Q1",
+          "value_pct_gdp": 33.0
+        },
+        {
+          "time": "2023-Q2",
+          "value_pct_gdp": 31.8
+        },
+        {
+          "time": "2023-Q3",
+          "value_pct_gdp": 30.9
+        },
+        {
+          "time": "2023-Q4",
+          "value_pct_gdp": 32.1
+        },
+        {
+          "time": "2024-Q1",
+          "value_pct_gdp": 31.6
+        },
+        {
+          "time": "2024-Q2",
+          "value_pct_gdp": 32.3
+        },
+        {
+          "time": "2024-Q3",
+          "value_pct_gdp": 32.3
+        },
+        {
+          "time": "2024-Q4",
+          "value_pct_gdp": 33.9
+        },
+        {
+          "time": "2025-Q1",
+          "value_pct_gdp": 33.5
+        }
+      ]
+    },
+    {
+      "country_code": "SI",
+      "country": "Slovenia",
+      "unit": "% of GDP",
+      "series": [
+        {
+          "time": "2022-Q2",
+          "value_pct_gdp": 75.6
+        },
+        {
+          "time": "2022-Q3",
+          "value_pct_gdp": 75.0
+        },
+        {
+          "time": "2022-Q4",
+          "value_pct_gdp": 72.7
+        },
+        {
+          "time": "2023-Q1",
+          "value_pct_gdp": 71.9
+        },
+        {
+          "time": "2023-Q2",
+          "value_pct_gdp": 70.0
+        },
+        {
+          "time": "2023-Q3",
+          "value_pct_gdp": 71.0
+        },
+        {
+          "time": "2023-Q4",
+          "value_pct_gdp": 68.4
+        },
+        {
+          "time": "2024-Q1",
+          "value_pct_gdp": 70.0
+        },
+        {
+          "time": "2024-Q2",
+          "value_pct_gdp": 69.4
+        },
+        {
+          "time": "2024-Q3",
+          "value_pct_gdp": 66.7
+        },
+        {
+          "time": "2024-Q4",
+          "value_pct_gdp": 67.0
+        },
+        {
+          "time": "2025-Q1",
+          "value_pct_gdp": 69.9
+        }
+      ]
+    },
+    {
+      "country_code": "SK",
+      "country": "Slovakia",
+      "unit": "% of GDP",
+      "series": [
+        {
+          "time": "2022-Q2",
+          "value_pct_gdp": 58.7
+        },
+        {
+          "time": "2022-Q3",
+          "value_pct_gdp": 57.3
+        },
+        {
+          "time": "2022-Q4",
+          "value_pct_gdp": 57.7
+        },
+        {
+          "time": "2023-Q1",
+          "value_pct_gdp": 57.8
+        },
+        {
+          "time": "2023-Q2",
+          "value_pct_gdp": 59.2
+        },
+        {
+          "time": "2023-Q3",
+          "value_pct_gdp": 58.0
+        },
+        {
+          "time": "2023-Q4",
+          "value_pct_gdp": 55.6
+        },
+        {
+          "time": "2024-Q1",
+          "value_pct_gdp": 60.2
+        },
+        {
+          "time": "2024-Q2",
+          "value_pct_gdp": 60.0
+        },
+        {
+          "time": "2024-Q3",
+          "value_pct_gdp": 59.8
+        },
+        {
+          "time": "2024-Q4",
+          "value_pct_gdp": 59.3
+        },
+        {
+          "time": "2025-Q1",
+          "value_pct_gdp": 62.8
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Eurostat 1.0 API; last 12 quarters as returned by API.",
+    "Series sorted by time ascending per country."
+  ]
+}

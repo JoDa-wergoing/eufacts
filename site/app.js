@@ -1,8 +1,8 @@
-// ---- Defaults ----
+// ==== Defaults ====
 const DEFAULT_DATA = new URLSearchParams(location.search).get('data') || './data/latest/teina230.json';
 const Y_BASELINE = { beginAtZero: true, suggestedMin: 0 };
 
-// ---- Elements ----
+// ==== Elements ====
 const el = (id) => document.getElementById(id);
 const dataUrlInput = el('dataUrl');
 const seriesKeySelect = el('seriesKey');
@@ -11,7 +11,7 @@ const meta = el('meta');
 const tableWrap = el('tableWrap');
 let CHART;
 
-// ---- Utils ----
+// ==== Utils ====
 function setMessage(text, kind='info'){
   if (!msg) return;
   msg.innerHTML = text ? `<div class="${kind==='error'?'error':'foot'}">${text}</div>` : '';
@@ -40,6 +40,8 @@ function toNum(v){
   const n = Number(s);
   return Number.isFinite(n) ? n : NaN;
 }
+
+// Time parsing: YYYY-Qn, Qn-YYYY, YYYY-MM, YYYYMn, YYYYMM, YYYY
 function parseTime(v){
   if (v==null) return null;
   const s = String(v).trim();
@@ -54,48 +56,62 @@ function parseTime(v){
   return isNaN(d) ? null : d;
 }
 
-// ---- JSON → rows ----
+// ==== JSON -> rows (flatten) ====
+// Supports:
+// A) {records:[{time, value_*, country*}, ...]}          (cross-section)
+// B) {records:[{country*, series:[{time, value_*},..]}]} (timeseries per land)
+// C) arrays or {data|rows|items|result: [...]}
 function objectJsonToRows(obj){
-  // Direct array
-  if (Array.isArray(obj)) return obj;
+  if (!obj) return null;
 
-  // Common containers
+  // C) array / common containers
+  if (Array.isArray(obj)) return obj;
   for (const k of ['data','rows','items','result']){
     if (Array.isArray(obj?.[k])) return obj[k];
   }
 
-  // records[].series[]  (timeseries per land)
-  if (Array.isArray(obj?.records) && Array.isArray(obj.records[0]?.series)){
-    const out = [];
-    for (const rec of obj.records){
-      const base = {
-        country: rec.country ?? rec.name ?? rec.geo_label ?? rec.country_name ?? undefined,
-        country_code: rec.country_code ?? rec.geo ?? undefined,
-        unit: rec.unit ?? obj.unit
-      };
-      for (const pt of rec.series){
-        // uniform keys
-        const row = { ...base, time: pt.time, value: pt.value ?? pt.OBS_VALUE ?? pt.value_pct_gdp ?? pt.value_pct ?? pt.val };
-        // als 'value' nog leeg is, kijk expliciet naar value_pct_gdp
-        if (row.value === undefined && pt.value_pct_gdp !== undefined) row.value = pt.value_pct_gdp;
-        // neem ook alle numerieke keys mee (zodat je kunt kiezen in de dropdown)
-        const allKeys = Object.keys(pt);
-        for (const k of allKeys){
-          if (k !== 'time') row[k] = pt[k];
-        }
-        out.push(row);
-      }
-    }
-    return out;
-  }
+  if (Array.isArray(obj.records)){
+    const first = obj.records[0] || {};
 
-  // records[] vlak (cross-section met time op record)
-  if (Array.isArray(obj?.records)){
+    // B) nested series per land
+    if (Array.isArray(first.series)){
+      const out = [];
+      for (const rec of obj.records){
+        const base = {
+          country: rec.country ?? rec.name ?? rec.geo_label ?? rec.country_name ?? undefined,
+          country_code: rec.country_code ?? rec.geo ?? undefined,
+          unit: rec.unit ?? obj.unit
+        };
+        for (const pt of rec.series || []){
+          const row = { ...base, time: pt.time };
+
+          // 1) kopieer alle keys van series punt
+          for (const k of Object.keys(pt)){
+            if (k !== 'time') row[k] = pt[k];
+          }
+          // 2) zorg dat we altijd een generieke 'value' hebben
+          if (row.value === undefined){
+            if (pt.value_pct_gdp !== undefined) row.value = pt.value_pct_gdp;
+            else if (pt.OBS_VALUE !== undefined) row.value = pt.OBS_VALUE;
+            else if (pt.value !== undefined) row.value = pt.value;
+            else {
+              // vind 1 bruikbare numerieke key als fallback
+              const numKey = Object.keys(row).find(k => k !== 'time' && Number.isFinite(toNum(row[k])));
+              if (numKey) row.value = row[numKey];
+            }
+          }
+          out.push(row);
+        }
+      }
+      return out;
+    }
+
+    // A) vlakke records
     return obj.records.map(r=>{
       const o = { ...r };
       if (o.value === undefined){
-        if (o.OBS_VALUE !== undefined) o.value = o.OBS_VALUE;
-        else if (o.value_pct_gdp !== undefined) o.value = o.value_pct_gdp;
+        if (o.value_pct_gdp !== undefined) o.value = o.value_pct_gdp;
+        else if (o.OBS_VALUE !== undefined) o.value = o.OBS_VALUE;
       }
       return o;
     });
@@ -104,21 +120,26 @@ function objectJsonToRows(obj){
   return null;
 }
 
-// ---- Parser ----
+// Parser (JSON/CSV) → altijd {rows: [...]}
 function tryParse(jsonOrCsv){
-  try {
+  try{
     const obj = JSON.parse(jsonOrCsv);
     const rows = objectJsonToRows(obj);
     return { rows: Array.isArray(rows) ? rows : [] };
-  } catch(e){
+  }catch(e){
     return { rows: parseCSV(jsonOrCsv) };
   }
 }
 
-// ---- Key detection ----
+// ==== Key detection over alle rijen ====
 function detectKeys(rows){
   if (!rows.length) return { timeKey:null, countryKey:null, numericKeys:[] };
-  const keys = Object.keys(rows[0] || {});
+
+  // verzamel alle keys die voorkomen
+  const keySet = new Set();
+  for (const r of rows){ Object.keys(r || {}).forEach(k => keySet.add(k)); }
+  const keys = [...keySet];
+
   const timeKey =
     keys.find(k=> ['time','TIME_PERIOD','period','date','year'].includes(k)) ||
     keys.find(k=> /time|period|date|year/i.test(k)) || null;
@@ -127,18 +148,26 @@ function detectKeys(rows){
     keys.find(k=> ['country','country_name','name','geo_label','country_code','geo','GEO'].includes(k)) ||
     keys.find(k=> /country|geo/i.test(k)) || null;
 
-  const numericKeys = keys.filter(k => rows.some(r => Number.isFinite(toNum(r[k])) ));
-  const filteredNumeric = numericKeys.filter(k => k !== timeKey && k !== countryKey);
+  // numerieke keys (minstens 1 bruikbaar datapunt in de hele set)
+  const numericKeys = keys.filter(k => k !== timeKey && k !== countryKey && rows.some(r => Number.isFinite(toNum(r?.[k])) ));
 
-  return { timeKey, countryKey, numericKeys: filteredNumeric };
+  return { timeKey, countryKey, numericKeys };
 }
 
-// ---- Shape / helpers ----
 function unique(arr){ return [...new Set(arr)]; }
 function summarizeShape(rows, timeKey){
   const times = unique(rows.map(r => timeKey ? String(r[timeKey]) : '').filter(Boolean));
   return { times, singlePeriod: times.length === 1, period: times[0] || null };
 }
+function labelForRow(r){
+  return r.country ?? r.country_name ?? r.name ?? r.geo_label ?? r.country_code ?? r.geo ?? '?';
+}
+function prettyMetricName(key){
+  const map = { value_pct_gdp: 'General government gross debt (% of GDP)', value: 'Value', OBS_VALUE: 'Observed value' };
+  return map[key] || String(key).replace(/_/g,' ').replace(/\b\w/g, c=>c.toUpperCase());
+}
+
+// Eén geo kiezen (voorkeur EU27/EA) als er meerdere landen zijn
 function pickGeo(rows, countryKey){
   if (!countryKey) return null;
   const geos = unique(rows.map(r => r[countryKey]).filter(Boolean).map(String));
@@ -146,18 +175,7 @@ function pickGeo(rows, countryKey){
   return prio.find(p => geos.includes(p)) || geos[0] || null;
 }
 
-// ---- Build series / tables ----
-function prettyMetricName(key){
-  const map = {
-    value_pct_gdp: 'General government gross debt (% of GDP)',
-    value: 'Value',
-    OBS_VALUE: 'Observed value'
-  };
-  return map[key] || String(key).replace(/_/g,' ').replace(/\b\w/g, c=>c.toUpperCase());
-}
-function labelForRow(r){
-  return r.country ?? r.country_name ?? r.name ?? r.geo_label ?? r.country_code ?? r.geo ?? '?';
-}
+// ==== Build datasets ====
 function buildTimeSeries(rows, timeKey, valueKey, countryKey){
   let useRows = rows;
   if (countryKey){
@@ -176,7 +194,7 @@ function buildBarRows(rows, countryKey, valueKey){
     .sort((a,b) => b.y - a.y);
 }
 
-// ---- Charts ----
+// ==== Charts ====
 async function ensureTimeAdapter(){
   if (window._chartTimeLoaded) return;
   await new Promise((resolve)=>{
@@ -210,7 +228,7 @@ function renderBar(items, valueKey, periodText){
   CHART = new Chart(ctx, { type:'bar', data, options });
 }
 
-// ---- Tables ----
+// ==== Tables ====
 function renderTableFromPoints(points){
   const fmt = new Intl.DateTimeFormat('en-CA',{year:'numeric',month:'2-digit',day:'2-digit'});
   let html = '<table><thead><tr><th>periode</th><th>waarde</th></tr></thead><tbody>';
@@ -225,7 +243,7 @@ function renderTableFromBars(items){
   tableWrap.innerHTML = html;
 }
 
-// ---- Main loader ----
+// ==== Main loader ====
 async function load(url){
   setMessage('Laden…');
   try{
@@ -234,17 +252,21 @@ async function load(url){
     if (!Array.isArray(rows) || !rows.length) throw new Error('Lege of ongeldige dataset.');
 
     const { timeKey, countryKey, numericKeys } = detectKeys(rows);
+    if (!timeKey) throw new Error('Geen tijdsleutel gevonden.');
     if (!numericKeys.length) throw new Error('Geen numerieke kolommen gevonden.');
 
+    // kies default metric (voorkeur value_pct_gdp) of enige numerieke key
     const preferred = ['value_pct_gdp','value','OBS_VALUE'];
-    const defaultKey = numericKeys.find(k => preferred.includes(k)) || numericKeys[0];
+    let defaultKey = numericKeys.find(k => preferred.includes(k)) || null;
+    if (!defaultKey && numericKeys.length === 1) defaultKey = numericKeys[0];
+    if (!defaultKey) defaultKey = numericKeys[0];
 
     seriesKeySelect.innerHTML = numericKeys.map(k => `<option value="${k}" ${k===defaultKey?'selected':''}>${k}</option>`).join('');
     const valueKey = seriesKeySelect.value || defaultKey;
 
     const { times, singlePeriod, period } = summarizeShape(rows, timeKey);
 
-    if (timeKey && singlePeriod && countryKey){
+    if (singlePeriod && countryKey){
       const bars = buildBarRows(rows, countryKey, valueKey);
       if (!bars.length) throw new Error('Geen waarden om te tonen (bar).');
       renderBar(bars, valueKey, period);
@@ -254,25 +276,20 @@ async function load(url){
       return;
     }
 
-    if (timeKey){
-      await ensureTimeAdapter();
-      const pts = buildTimeSeries(rows, timeKey, valueKey, countryKey);
-      if (!pts.length) throw new Error('Kon geen tijdreeks afleiden uit de data.');
-      renderLine(pts, valueKey);
-      renderTableFromPoints(pts);
-      meta.innerHTML = `Bron: <code>${url}</code> · Records: <b>${rows.length}</b> · Waarde: <code>${valueKey}</code>`;
-      setMessage('');
-      return;
-    }
-
-    throw new Error('Geen tijdsleutel gevonden.');
+    await ensureTimeAdapter();
+    const pts = buildTimeSeries(rows, timeKey, valueKey, countryKey);
+    if (!pts.length) throw new Error('Kon geen tijdreeks afleiden uit de data.');
+    renderLine(pts, valueKey);
+    renderTableFromPoints(pts);
+    meta.innerHTML = `Bron: <code>${url}</code> · Records: <b>${rows.length}</b> · Waarde: <code>${valueKey}</code>`;
+    setMessage('');
   }catch(err){
     console.error(err);
     setMessage('Fout: ' + err.message, 'error');
   }
 }
 
-// ---- Wire & boot ----
+// ==== Wire & boot ====
 document.addEventListener('DOMContentLoaded', ()=>{
   if (dataUrlInput) dataUrlInput.value = DEFAULT_DATA;
   document.getElementById('loadBtn')?.addEventListener('click', ()=> load(dataUrlInput.value || DEFAULT_DATA));

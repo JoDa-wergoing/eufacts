@@ -21,8 +21,8 @@
     .card{background:var(--card); border:1px solid var(--ring); border-radius:14px; padding:14px; box-shadow:0 1px 0 rgba(15,23,42,.03)}
     label{font-size:13px; color:var(--muted); display:block; margin-bottom:6px}
     input, select{width:100%; padding:10px 12px; border:1px solid var(--ring); border-radius:10px; font-size:14px; background:#fff}
-    .row{display:flex; gap:10px; align-items:end}
-    .row > div{flex:1}
+    .row{display:flex; gap:10px; align-items:end; flex-wrap:wrap}
+    .row > div{flex:1; min-width:220px}
     table{width:100%; border-collapse:collapse; font-size:13px}
     th,td{padding:8px 10px; border-bottom:1px solid var(--ring); text-align:left}
     th{font-weight:600; color:var(--muted)}
@@ -47,6 +47,10 @@
           <input id="dataUrl" placeholder="bv. ./data/latest/teina230.json" />
         </div>
         <div>
+          <label for="geoSelect">Land/geo (alleen voor timeseries met meerdere geos)</label>
+          <select id="geoSelect"></select>
+        </div>
+        <div>
           <label for="seriesKey">Waarde-kolom</label>
           <select id="seriesKey"></select>
         </div>
@@ -58,7 +62,7 @@
 
     <section class="grid">
       <div class="card">
-        <canvas id="chart" height="172"></canvas>
+        <canvas id="chart" height="176"></canvas>
       </div>
       <div class="card">
         <div id="meta" class="foot"></div>

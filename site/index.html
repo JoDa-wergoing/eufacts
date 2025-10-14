@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="nl">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Eufacts • teina230 — Visual MVP</title>
-  <meta name="description" content="Eufacts MVP: minimal, fast visual for Eurostat teina230 dataset" />
+  <title>Eufacts • Dataset Viewer</title>
+  <meta name="description" content="Eufacts viewer voor Eurostat datasets (timeseries & cross-section)" />
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script defer src="./app.js"></script>
@@ -29,14 +29,13 @@
     .badge{display:inline-block; padding:.2rem .5rem; border-radius:999px; background:#eef2ff; color:#3730a3; font-size:12px}
     .foot{color:var(--muted); font-size:12px}
     .error{color:#b91c1c; background:#fef2f2; border:1px solid #fee2e2; padding:10px; border-radius:10px}
-    kbd{background:#e2e8f0; padding:2px 6px; border-radius:6px; font-size:12px}
   </style>
 </head>
 <body>
   <header>
     <div class="wrap">
-      <h1>Eufacts — <span class="badge">teina230</span> Visual MVP</h1>
-      <div class="sub">Minimalistische, statische pagina die data uit <code>data/latest/</code> laadt en een lijnchart + tabel toont. Gebruik <kbd>?data=</kbd> om een eigen pad te geven.</div>
+      <h1>Eufacts — <span class="badge">Viewer</span></h1>
+      <div class="sub">Één periode ⇒ landenranglijst (bar). Meerdere periodes ⇒ tijdreeks (line). Zero-baseline, auto-detect van kolommen.</div>
     </div>
   </header>
 
@@ -44,11 +43,11 @@
     <div class="card">
       <div class="row">
         <div>
-          <label for="dataUrl">Data-bestand (JSON of CSV)</label>
-          <input id="dataUrl" placeholder="bv. data/latest/teina230.json" />
+          <label for="dataUrl">Data-bestand (JSON/CSV)</label>
+          <input id="dataUrl" placeholder="bv. ./data/latest/teina230.json" />
         </div>
         <div>
-          <label for="seriesKey">Waarde-kolom / key</label>
+          <label for="seriesKey">Waarde-kolom</label>
           <select id="seriesKey"></select>
         </div>
         <div>
@@ -59,7 +58,7 @@
 
     <section class="grid">
       <div class="card">
-        <canvas id="chart" height="140"></canvas>
+        <canvas id="chart" height="170"></canvas>
       </div>
       <div class="card">
         <div id="meta" class="foot"></div>
@@ -70,7 +69,9 @@
       <div id="tableWrap"></div>
     </section>
 
-    <p class="foot">Tip: Plaats dit bestand als <code>index.html</code> in de root of in <code>site/</code> en zet GitHub Pages aan (Settings → Pages). Structuur verwacht <code>data/latest/...</code> paden in dezelfde repo.</p>
+    <p class="foot">
+      Standaard: <code>./data/latest/teina230.json</code> · Timeseries: <code>./data/latest/teina230-timeseries.json</code> of <code>..._timeseries.json</code>.
+    </p>
 
     <div id="msg" class="foot"></div>
   </main>

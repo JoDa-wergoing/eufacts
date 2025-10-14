@@ -1,4 +1,4 @@
-  // ---- Config ----
+    // ---- Config ----
     const DEFAULT_DATA = new URLSearchParams(location.search).get('data') || './data/latest/teina230.json';
 
     const el = (id) => document.getElementById(id);
@@ -7,6 +7,7 @@
     const msg = el('msg');
     const meta = el('meta');
     const tableWrap = el('tableWrap');
+
     let CHART;
 
     function setMessage(text, kind='info'){
@@ -32,7 +33,7 @@
       });
     }
 
-    // JSON/CSV tolerant parser
+    // JSON/CSV tolerant parser (supports {records:[...]}, {data:[...]}, etc.)
     function tryParse(jsonOrCsv){
       try {
         const obj = JSON.parse(jsonOrCsv);
@@ -48,16 +49,17 @@
 
     function detectKeys(rows){
       if(!rows.length) return { timeKey:null, numericKeys:[] };
-      const keys = Object.keys(rows[0] || {});
-      // tijd
+      const sample = rows[0] || {};
+      const keys = Object.keys(sample);
+      // guess time key
       const timeCandidates = ['time','period','date','TIME','TIME_PERIOD','year'];
-      const timeKey = keys.find(k=> timeCandidates.includes(k)) || keys.find(k=> /time|period|date|year/i.test(k));
-      // numeriek (robust: spaties/komma's)
+      const timeKey = keys.find(k=> timeCandidates.includes(k)) || keys.find(k=>/time|period|date|year/i.test(k));
+      // robust numeric detection (commas & spaces)
       const toNum = (v)=>{
         if (v==null) return NaN;
         if (typeof v === 'number') return v;
         if (typeof v !== 'string') return Number(v);
-        const s = v.replace(/\s+/g,'').replace(',', '.');
+        const s = v.replace(/\s+/g,'').replace(',', '.');   // "1 234,56" → "1234.56"
         const n = Number(s);
         return Number.isFinite(n) ? n : NaN;
       };
@@ -65,6 +67,7 @@
       return { timeKey, numericKeys: numericKeys.filter(k=>k!==timeKey) };
     }
 
+    // Parse times like YYYY, YYYY-MM, YYYY-Qn, Qn-YYYY, YYYYMn, YYYYMM
     function normalize(rows, timeKey, seriesKey){
       const toDate = (v)=>{
         const s = String(v ?? '').trim();
@@ -107,13 +110,13 @@
         document.head.appendChild(s);
         window._chartTimeLoaded = true;
       }
-      if (window.CHART) window.CHART.destroy();
-      window.CHART = new Chart(ctx, { type:'line', data, options });
+      if (CHART) CHART.destroy();
+      CHART = new Chart(ctx, { type:'line', data, options });
     }
 
     function renderTable(points){
       const fmt = new Intl.DateTimeFormat('en-CA',{year:'numeric',month:'2-digit',day:'2-digit'});
-      let html = '<table><thead><tr><th>periode</th><th>waarde</th></tr></thead><tbody>';
+      let html = '<table><thead><tr><th>period</th><th>value</th></tr></thead><tbody>';
       html += points.map(p=> `<tr><td>${fmt.format(p.x).slice(0,7)}</td><td>${p.y}</td></tr>`).join('');
       html += '</tbody></table>';
       tableWrap.innerHTML = html;
@@ -130,7 +133,7 @@
         const { timeKey, numericKeys } = detectKeys(rows);
         if (!numericKeys.length) throw new Error('Geen numerieke kolommen gevonden.');
 
-        // dropdown (kies liever value_pct_gdp / value / OBS_VALUE)
+        // Dropdown (voorkeur voor value_pct_gdp / value / OBS_VALUE)
         const preferred = ['value_pct_gdp','value','OBS_VALUE'];
         const defaultKey = numericKeys.find(k=> preferred.includes(k)) || numericKeys[0];
         seriesKeySelect.innerHTML = numericKeys.map(k=>`<option value="${k}" ${k===defaultKey?'selected':''}>${k}</option>`).join('');

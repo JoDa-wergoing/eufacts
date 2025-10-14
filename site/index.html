@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="nl">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -36,7 +36,7 @@
   <header>
     <div class="wrap">
       <h1>Eufacts — <span class="badge">teina230</span> Visual MVP</h1>
-      <div class="sub">Laadt JSON/CSV uit <code>data/latest/</code> en toont een tijdreeks + tabel. Gebruik <kbd>?data=</kbd> voor een ander pad.</div>
+      <div class="sub">Minimalistische, statische pagina die data uit <code>data/latest/</code> laadt en een lijnchart + tabel toont. Gebruik <kbd>?data=</kbd> om een eigen pad te geven.</div>
     </div>
   </header>
 
@@ -44,11 +44,11 @@
     <div class="card">
       <div class="row">
         <div>
-          <label for="dataUrl">Data-bestand (JSON/CSV)</label>
-          <input id="dataUrl" placeholder="bv. ./data/latest/teina230.json" />
+          <label for="dataUrl">Data-bestand (JSON of CSV)</label>
+          <input id="dataUrl" placeholder="bv. data/latest/teina230.json" />
         </div>
         <div>
-          <label for="seriesKey">Waarde-kolom</label>
+          <label for="seriesKey">Waarde-kolom / key</label>
           <select id="seriesKey"></select>
         </div>
         <div>
@@ -59,7 +59,7 @@
 
     <section class="grid">
       <div class="card">
-        <canvas id="chart" height="160"></canvas>
+        <canvas id="chart" height="140"></canvas>
       </div>
       <div class="card">
         <div id="meta" class="foot"></div>
@@ -69,6 +69,8 @@
     <section class="card">
       <div id="tableWrap"></div>
     </section>
+
+    <p class="foot">Tip: Plaats dit bestand als <code>index.html</code> in de root of in <code>site/</code> en zet GitHub Pages aan (Settings → Pages). Structuur verwacht <code>data/latest/...</code> paden in dezelfde repo.</p>
 
     <div id="msg" class="foot"></div>
   </main>

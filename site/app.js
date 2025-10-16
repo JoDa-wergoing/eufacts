@@ -1,5 +1,5 @@
 // ==== Defaults ====
-const DEFAULT_DATA = new URLSearchParams(location.search).get('data') || './data/latest/teina230.json';
+const DEFAULT_DATA = new URLSearchParams(location.search).get('data') || './data/latest/teina230-timeseries.json';
 const Y_BASELINE = { beginAtZero: true, suggestedMin: 0 };
 
 // ==== Elements ====
@@ -22,6 +22,7 @@ async function fetchText(url){
   if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
   return await res.text();
 }
+// CSV → objects
 function parseCSV(text){
   const lines = text.trim().split(/\r?\n/);
   if (!lines.length) return [];
@@ -41,7 +42,7 @@ function toNum(v){
   const n = Number(s);
   return Number.isFinite(n) ? n : NaN;
 }
-// Time parsing: YYYY-Qn, Qn-YYYY, YYYY-MM, YYYYMn, YYYYMM, YYYY
+// Tijd: YYYY-Qn, Qn-YYYY, YYYY-MM, YYYYMn, YYYYMM, YYYY
 function parseTime(v){
   if (v==null) return null;
   const s = String(v).trim();
@@ -55,16 +56,18 @@ function parseTime(v){
   const d = new Date(s);
   return isNaN(d) ? null : d;
 }
+function inferTimeUnit(points){
+  // Als alle punten op januari staan, ga uit van jaardata
+  return points.length && points.every(p => p.x instanceof Date && p.x.getUTCMonth() === 0) ? 'year' : 'month';
+}
 
-// ==== JSON -> rows (flatten) ====
-// Supports:
+// ==== JSON → rows (flatten) ====
 // A) {records:[{time, value_*, country*}, ...]}          (cross-section)
 // B) {records:[{country*, series:[{time, value_*},..]}]} (timeseries per land)
-// C) arrays or {data|rows|items|result: [...]}
+// C) arrays of {data|rows|items|result: [...]}
 function objectJsonToRows(obj){
   if (!obj) return null;
 
-  // C) array / common containers
   if (Array.isArray(obj)) return obj;
   for (const k of ['data','rows','items','result']){
     if (Array.isArray(obj?.[k])) return obj[k];
@@ -73,7 +76,7 @@ function objectJsonToRows(obj){
   if (Array.isArray(obj.records)){
     const first = obj.records[0] || {};
 
-    // B) nested series per land
+    // B) geneste series per land
     if (Array.isArray(first.series)){
       const out = [];
       for (const rec of obj.records){
@@ -84,9 +87,7 @@ function objectJsonToRows(obj){
         };
         for (const pt of rec.series || []){
           const row = { ...base, time: pt.time };
-          // Kopieer alle keys (zodat user ook value_pct_gdp kan kiezen)
           for (const k of Object.keys(pt)){ if (k !== 'time') row[k] = pt[k]; }
-          // Zorg voor generieke 'value'
           if (row.value === undefined){
             if (pt.value_pct_gdp !== undefined) row.value = pt.value_pct_gdp;
             else if (pt.OBS_VALUE !== undefined) row.value = pt.OBS_VALUE;
@@ -125,7 +126,7 @@ function tryParse(jsonOrCsv){
   }
 }
 
-// ==== Key detection over alle rijen ====
+// ==== Key detection ====
 function detectKeys(rows){
   if (!rows.length) return { timeKey:null, countryKey:null, numericKeys:[], geos:[] };
 
@@ -141,15 +142,17 @@ function detectKeys(rows){
     keys.find(k=> ['country','country_name','name','geo_label','country_code','geo','GEO'].includes(k)) ||
     keys.find(k=> /country|geo/i.test(k)) || null;
 
-  const numericKeys = keys.filter(k => k !== timeKey && k !== countryKey && keys.length &&
+  const numericKeys = keys.filter(k => k !== timeKey && k !== countryKey &&
     rows.some(r => Number.isFinite(toNum(r?.[k])) ));
 
   const geos = countryKey ? [...new Set(rows.map(r => r[countryKey]).filter(Boolean).map(String))] : [];
 
   return { timeKey, countryKey, numericKeys, geos };
 }
+
+function unique(arr){ return [...new Set(arr)]; }
 function summarizeShape(rows, timeKey){
-  const times = [...new Set(rows.map(r => timeKey ? String(r[timeKey]) : '').filter(Boolean))];
+  const times = unique(rows.map(r => timeKey ? String(r[timeKey]) : '').filter(Boolean));
   return { times, singlePeriod: times.length === 1, period: times[0] || null };
 }
 function labelForRow(r){
@@ -159,26 +162,33 @@ function prettyMetricName(key){
   const map = { value_pct_gdp: 'General government gross debt (% of GDP)', value: 'Value', OBS_VALUE: 'Observed value' };
   return map[key] || String(key).replace(/_/g,' ').replace(/\b\w/g, c=>c.toUpperCase());
 }
-function pickDefaultGeo(geos){
-  const prio = ['EU27_2020','EA20','EA19','EU28','EU27'];
-  return prio.find(p => geos.includes(p)) || geos[0] || null;
-}
 
 // ==== Build datasets ====
-function buildTimeSeries(rows, timeKey, valueKey, countryKey, geoChoice){
+// Multilijn: groepeer per geo en maak per geo een dataset
+function buildMultiSeries(rows, timeKey, valueKey, countryKey, selectedGeos){
+  // Filter op selectie (indien opgegeven)
   let useRows = rows;
-  if (countryKey && geoChoice){
-    useRows = rows.filter(r => String(r[countryKey]) === String(geoChoice));
+  if (countryKey && selectedGeos && selectedGeos.length){
+    const set = new Set(selectedGeos.map(String));
+    useRows = rows.filter(r => set.has(String(r[countryKey])));
   }
-  // Fallback: als filter niks geeft, gebruik alle rijen (om altijd punten te hebben)
-  if (!useRows.length && countryKey){
-    useRows = rows;
+  // Groepeer
+  const byGeo = new Map();
+  for (const r of useRows){
+    const geo = countryKey ? String(r[countryKey]) : 'ALL';
+    if (!byGeo.has(geo)) byGeo.set(geo, []);
+    const x = parseTime(r[timeKey]);
+    const y = toNum(r[valueKey]);
+    if (x instanceof Date && !isNaN(x) && Number.isFinite(y)) byGeo.get(geo).push({x,y});
   }
-  const pts = useRows
-    .map(r => ({ x: parseTime(r[timeKey]), y: toNum(r[valueKey]) }))
-    .filter(p => p.x instanceof Date && !isNaN(p.x) && Number.isFinite(p.y))
-    .sort((a,b) => a.x - b.x);
-  return pts;
+  // Sorteren en omzetten naar Chart.js-datasets
+  const datasets = [];
+  for (const [geo, pts] of byGeo.entries()){
+    if (!pts.length) continue;
+    pts.sort((a,b)=> a.x - b.x);
+    datasets.push({ label: geo, data: pts.map(p=>({x:p.x, y:p.y})), tension: .2 });
+  }
+  return datasets;
 }
 function buildBarRows(rows, countryKey, valueKey){
   return rows.map(r => ({ label: labelForRow(r), y: toNum(r[valueKey]) }))
@@ -197,13 +207,13 @@ async function ensureTimeAdapter(){
   });
   window._chartTimeLoaded = true;
 }
-function renderLine(points, valueKey){
+function renderLineMulti(datasets, timeUnit, valueKey){
   const ctx = document.getElementById('chart');
-  const data = { datasets: [{ label: prettyMetricName(valueKey), data: points.map(p=>({x:p.x, y:p.y})), tension:.2 }] };
+  const data = { datasets };
   const options = {
     responsive: true, parsing: false,
-    scales: { x: { type:'time', time:{ unit:'month' } }, y: { ...Y_BASELINE } },
-    plugins: { legend:{ display:false }, title:{ display:true, text: prettyMetricName(valueKey) } }
+    scales: { x: { type:'time', time:{ unit: timeUnit } }, y: { ...Y_BASELINE } },
+    plugins: { legend:{ display:true }, title:{ display:true, text: prettyMetricName(valueKey) } }
   };
   if (CHART) CHART.destroy();
   CHART = new Chart(ctx, { type:'line', data, options });
@@ -221,10 +231,18 @@ function renderBar(items, valueKey, periodText){
 }
 
 // ==== Tables ====
-function renderTableFromPoints(points){
-  const fmt = new Intl.DateTimeFormat('en-CA',{year:'numeric',month:'2-digit',day:'2-digit'});
-  let html = '<table><thead><tr><th>periode</th><th>waarde</th></tr></thead><tbody>';
-  html += points.map(p=> `<tr><td>${fmt.format(p.x).slice(0,7)}</td><td>${p.y}</td></tr>`).join('');
+function renderTableFromDatasets(datasets){
+  // toon de laatste waarde per geo
+  let rows = [];
+  for (const ds of datasets){
+    if (!ds.data.length) continue;
+    const last = ds.data[ds.data.length-1];
+    const ym = new Intl.DateTimeFormat('en-CA',{year:'numeric',month:'2-digit',day:'2-digit'}).format(last.x).slice(0,7);
+    rows.push({ geo: ds.label, period: ym, value: last.y });
+  }
+  rows.sort((a,b)=> b.value - a.value);
+  let html = '<table><thead><tr><th>geo</th><th>periode (laatste)</th><th>waarde</th></tr></thead><tbody>';
+  html += rows.map(r=> `<tr><td>${r.geo}</td><td>${r.period}</td><td>${r.value}</td></tr>`).join('');
   html += '</tbody></table>';
   tableWrap.innerHTML = html;
 }
@@ -247,49 +265,50 @@ async function load(url){
     if (!timeKey) throw new Error('Geen tijdsleutel gevonden.');
     if (!numericKeys.length) throw new Error('Geen numerieke kolommen gevonden.');
 
-    // serie-keuze
+    // Serie-keuze
     const preferred = ['value_pct_gdp','value','OBS_VALUE'];
     let defaultKey = numericKeys.find(k => preferred.includes(k)) || numericKeys[0];
     seriesKeySelect.innerHTML = numericKeys.map(k => `<option value="${k}" ${k===defaultKey?'selected':''}>${k}</option>`).join('');
     const valueKey = seriesKeySelect.value || defaultKey;
 
-    // geo-keuze (alleen tonen bij meerdere geos)
-    geoSelect.innerHTML = '';
-    geoSelect.style.display = 'none';
-    let geoChoice = null;
-    if (countryKey && geos.length > 0){
-      const defaultGeo = pickDefaultGeo(geos);
-      geoSelect.innerHTML = geos.map(g => `<option value="${g}" ${g===defaultGeo?'selected':''}>${g}</option>`).join('');
-      geoSelect.style.display = '';
-      geoChoice = geoSelect.value || defaultGeo;
-    }
+    // Geo-keuze (multiselect) – vul en behoud vorige selectie zoveel mogelijk
+    const prevSelection = new Set([...geoSelect.selectedOptions].map(o=>o.value));
+    geoSelect.innerHTML = geos.map(g => `<option value="${g}" ${prevSelection.has(g)?'selected':''}>${g}</option>`).join('');
 
     const { times, singlePeriod, period } = summarizeShape(rows, timeKey);
 
     if (singlePeriod && countryKey){
-      // BAR per land (één periode)
+      // BAR: één periode (ranglijst)
       const bars = buildBarRows(rows, countryKey, valueKey);
       if (!bars.length) throw new Error('Geen waarden om te tonen (bar).');
       renderBar(bars, valueKey, period);
       renderTableFromBars(bars);
-      meta.innerHTML = `Bron: <code>${url}</code> · Records: <b>${rows.length}</b> · Periode: <b>${period}</b> · Waarde: <code>${valueKey}</code>`;
+      meta.innerHTML = `Bron: <code>${url}</code> · Records: <b>${rows.length}</b> · Periode: <b>${period}</b> · Kolom: <code>${valueKey}</code>`;
       setMessage('');
       return;
     }
 
-    // LINE (meerdere periodes)
+    // LINE: meerdere periodes – multilijn
     await ensureTimeAdapter();
-    let pts = buildTimeSeries(rows, timeKey, valueKey, countryKey, geoChoice);
 
-    // Fallback: lukt het niet met geselecteerde geo, probeer zonder filter
-    if (!pts.length){
-      pts = buildTimeSeries(rows, timeKey, valueKey, null, null);
+    const selectedGeos = [...geoSelect.selectedOptions].map(o=>o.value);
+    let datasets = buildMultiSeries(rows, timeKey, valueKey, countryKey, selectedGeos);
+
+    // Fallback: als géén selectie of geen punten → kies automatisch een paar prominente geo’s
+    if (!datasets.length){
+      const prio = ['EU27_2020','EA20','EA19'];
+      const auto = geos.length ? (prio.filter(p=>geos.includes(p)).concat(geos)).slice(0,5) : [];
+      geoSelect.innerHTML = auto.map(g => `<option value="${g}" selected>${g}</option>`).join('');
+      datasets = buildMultiSeries(rows, timeKey, valueKey, countryKey, auto);
     }
-    if (!pts.length) throw new Error('Kon geen tijdreeks afleiden uit de data.');
 
-    renderLine(pts, valueKey);
-    renderTableFromPoints(pts);
-    meta.innerHTML = `Bron: <code>${url}</code> · Records: <b>${rows.length}</b> · Waarde: <code>${valueKey}</code>${geoChoice?` · Geo: <b>${geoChoice}</b>`:''}`;
+    if (!datasets.length) throw new Error('Kon geen tijdreeks afleiden uit de data.');
+
+    const allPoints = datasets.flatMap(ds => ds.data);
+    const unit = inferTimeUnit(allPoints);
+    renderLineMulti(datasets, unit, valueKey);
+    renderTableFromDatasets(datasets);
+    meta.innerHTML = `Bron: <code>${url}</code> · Records: <b>${rows.length}</b> · Kolom: <code>${valueKey}</code> · Reeksen: <b>${datasets.length}</b>`;
     setMessage('');
   }catch(err){
     console.error(err);

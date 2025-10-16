@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Eufacts • Dataset Viewer</title>
-  <meta name="description" content="Eufacts viewer voor Eurostat datasets (timeseries & cross-section)" />
+  <title>Eufacts • Dataset Viewer (Multi-country)</title>
+  <meta name="description" content="Eufacts viewer voor Eurostat datasets (timeseries & cross-section) met multilijn-overlays" />
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script defer src="./app.js"></script>
@@ -13,29 +13,30 @@
     *{box-sizing:border-box}
     body{margin:0; font:16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji"; color:var(--fg); background:var(--bg)}
     header{position:sticky; top:0; z-index:10; backdrop-filter:saturate(180%) blur(8px); background:rgba(248,250,252,.85); border-bottom:1px solid var(--ring)}
-    .wrap{max-width:1100px; margin:0 auto; padding:16px}
+    .wrap{max-width:1200px; margin:0 auto; padding:16px}
     h1{font-size:20px; margin:0 0 4px 0}
     .sub{color:var(--muted); font-size:13px}
     .grid{display:grid; grid-template-columns: 1fr; gap:16px; padding:16px;}
-    @media(min-width:900px){ .grid{ grid-template-columns: 2fr 1fr; } }
+    @media(min-width:1100px){ .grid{ grid-template-columns: 2fr 1fr; } }
     .card{background:var(--card); border:1px solid var(--ring); border-radius:14px; padding:14px; box-shadow:0 1px 0 rgba(15,23,42,.03)}
     label{font-size:13px; color:var(--muted); display:block; margin-bottom:6px}
     input, select{width:100%; padding:10px 12px; border:1px solid var(--ring); border-radius:10px; font-size:14px; background:#fff}
     .row{display:flex; gap:10px; align-items:end; flex-wrap:wrap}
-    .row > div{flex:1; min-width:220px}
+    .row > div{flex:1; min-width:230px}
     table{width:100%; border-collapse:collapse; font-size:13px}
     th,td{padding:8px 10px; border-bottom:1px solid var(--ring); text-align:left}
     th{font-weight:600; color:var(--muted)}
     .badge{display:inline-block; padding:.2rem .5rem; border-radius:999px; background:#eef2ff; color:#3730a3; font-size:12px}
     .foot{color:var(--muted); font-size:12px}
     .error{color:#b91c1c; background:#fef2f2; border:1px solid #fee2e2; padding:10px; border-radius:10px}
+    .hint{font-size:12px; color:var(--muted); margin-top:4px}
   </style>
 </head>
 <body>
   <header>
     <div class="wrap">
       <h1>Eufacts — <span class="badge">Viewer</span></h1>
-      <div class="sub">Één periode ⇒ landenranglijst (bar). Meerdere periodes ⇒ tijdreeks (line). Zero-baseline, auto-detect.</div>
+      <div class="sub">Één periode ⇒ landenranglijst (bar). Meerdere periodes ⇒ multilijn (line). Zero-baseline. Auto-detect van kolommen.</div>
     </div>
   </header>
 
@@ -44,17 +45,19 @@
       <div class="row">
         <div>
           <label for="dataUrl">Data-bestand (JSON/CSV)</label>
-          <input id="dataUrl" placeholder="bv. ./data/latest/teina230.json" />
+          <input id="dataUrl" placeholder="bv. ./data/latest/teina230-timeseries.json" />
+          <div class="hint">Tip: gebruik <code>?data=...</code> in de URL om een bron te forceren.</div>
         </div>
         <div>
-          <label for="geoSelect">Land/geo (alleen voor timeseries met meerdere geos)</label>
-          <select id="geoSelect"></select>
+          <label for="geoSelect">Landen/geo’s (meerdere toegestaan)</label>
+          <select id="geoSelect" multiple size="6"></select>
+          <div class="hint">Gebruik Ctrl/⌘-klik om meerdere te kiezen.</div>
         </div>
         <div>
           <label for="seriesKey">Waarde-kolom</label>
           <select id="seriesKey"></select>
         </div>
-        <div>
+        <div style="align-self:flex-end">
           <button id="loadBtn" style="padding:10px 14px; border-radius:10px; border:1px solid var(--ring); background:#111827; color:#fff; font-weight:600">Laad</button>
         </div>
       </div>
@@ -62,7 +65,7 @@
 
     <section class="grid">
       <div class="card">
-        <canvas id="chart" height="176"></canvas>
+        <canvas id="chart" height="220"></canvas>
       </div>
       <div class="card">
         <div id="meta" class="foot"></div>
@@ -74,7 +77,7 @@
     </section>
 
     <p class="foot">
-      Standaard: <code>./data/latest/teina230.json</code> · Timeseries: <code>./data/latest/teina230-timeseries.json</code> of <code>..._timeseries.json</code>.
+      Voorbeeldpaden: <code>./data/latest/teina230.json</code> (cross-section) · <code>./data/latest/teina230-timeseries.json</code> (timeseries).
     </p>
 
     <div id="msg" class="foot"></div>

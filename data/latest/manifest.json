@@ -2,15 +2,15 @@
   "dataset": "TEINA230",
   "latest_file": "latest/eu_debt.json",
   "timeseries_file": "timeseries/eu_debt_12q.json",
-  "snapshot_file": "snapshots/2025-10-15/eu_debt.json",
+  "snapshot_file": "snapshots/2025-10-16/eu_debt.json",
   "source_url": "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/teina230?lastTimePeriod=12",
-  "generated_at": "2025-10-15T04:23:24.242299+00:00",
+  "generated_at": "2025-10-16T04:23:08.222268+00:00",
   "record_count_latest": 30,
   "record_count_timeseries": 360,
   "latest_period": "2025-Q1",
-  "hash_latest": "sha256:70c35d9f89b6dc8f2889f799b085fad8bd9c4f41a57b43259d365a7fd99339f7",
-  "hash_timeseries": "sha256:dbdce70239be8d0b42e845005deb13b51647d627952035b8215a1b9959fa9642",
-  "hash_snapshot": "sha256:70c35d9f89b6dc8f2889f799b085fad8bd9c4f41a57b43259d365a7fd99339f7",
+  "hash_latest": "sha256:4cdc9216bac9c40f9f187e5a2b88c52210923179830eef1de3ba575f7ce802f9",
+  "hash_timeseries": "sha256:1b6b9d84e223d743416e5d61b0f409c43e26afcdfc53c03e94d7744e71c5f3f2",
+  "hash_snapshot": "sha256:4cdc9216bac9c40f9f187e5a2b88c52210923179830eef1de3ba575f7ce802f9",
   "schema_latest": {
     "fields": [
       {

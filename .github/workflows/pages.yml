@@ -1,3 +1,4 @@
+# .github/workflows/pages.yml
 name: Deploy website (site/ + data/) to GitHub Pages
 
 on:
@@ -31,53 +32,35 @@ jobs:
       - name: Prepare site folder (preserve HTML + copy data + build latest aliases)
         shell: bash
         run: |
-          set -Eeuo pipefail
+          set -euxo pipefail
 
-          # 1) Vereist: site/ met index.html
-          test -d site || (echo "site/ ontbreekt" && exit 1)
-          test -f site/index.html || (echo "site/index.html ontbreekt" && exit 1)
-
-          # 2) Kopieer data/ naar publicatiemap
-          mkdir -p site/data
-          rsync -a --delete data/ site/data/ || true
-
-          # 3) 'latest' aliassen voor ALLE datasets in snapshots/ (pak de nieuwste per bestandsnaam)
+          test -d site
           mkdir -p site/data/latest
-          if [ -d data/snapshots ]; then
-            mapfile -t SNAP_JSONS < <(ls -1t data/snapshots/*/*.json 2>/dev/null || true)
 
-            # Associatieve array voor de-dedupe (eerste = nieuwste wint)
-            declare -A seen=()
+          # Publiceer ruwe data-mappen ook onder /site/data/ (handig voor debug/download)
+          rsync -a --delete data/ site/data/
 
-            for f in "${SNAP_JSONS[@]}"; do
-              base="${f##*/}"            # bv. teina230.json
-              base_norm="${base//_/-}"   # underscores -> koppeltekens
+          # Bouw latest aliassen: pak per bestandsnaam de nieuwste JSON
+          mapfile -t ALL_JSONS < <(ls -1t data/snapshots/*/*.json data/timeseries/*/*.json 2>/dev/null || true)
+          declare -A seen=()
+          for f in "${ALL_JSONS[@]}"; do
+            base="$(basename "$f")"
+            if [[ -z "${seen[$base]+x}" ]]; then
+              cp -f "$f" "site/data/latest/$base"
+              seen["$base"]=1
+            fi
+          done
 
-              # set -u safe: check of key al bestaat
-              if [[ -z "${seen[$base]+x}" ]]; then
-                cp "$f" "site/data/latest/$base_norm"
-                echo "Aliased $f -> site/data/latest/$base_norm"
-                seen["$base"]=1
-              fi
-            done
+          # Timeseries alias: hyphen <-> underscore
+          if [[ -f "site/data/latest/teina230_timeseries.json" && ! -f "site/data/latest/teina230-timeseries.json" ]]; then
+            cp -f "site/data/latest/teina230_timeseries.json" "site/data/latest/teina230-timeseries.json"
+          fi
+          if [[ -f "site/data/latest/teina230-timeseries.json" && ! -f "site/data/latest/teina230_timeseries.json" ]]; then
+            cp -f "site/data/latest/teina230-timeseries.json" "site/data/latest/teina230_timeseries.json"
           fi
 
-          # 4) 'latest' aliassen voor timeseries/ (alle JSONs)
-          if [ -d data/timeseries ]; then
-            shopt -s nullglob
-            for f in data/timeseries/*.json; do
-              base="${f##*/}"
-              base_norm="${base//_/-}"
-              cp "$f" "site/data/latest/$base_norm"
-              echo "Aliased $f -> site/data/latest/$base_norm"
-            done
-            shopt -u nullglob
-          fi
-
-          # 5) Diagnose
-          echo "::group::Listing site/data/latest"
-          ls -al site/data/latest || true
-          echo "::endgroup::"
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

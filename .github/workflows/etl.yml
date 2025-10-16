@@ -9,74 +9,91 @@ on:
 permissions:
   contents: write  # <- nodig om te kunnen pushen
 
-jobs:
-  run-etl:
-    runs-on: ubuntu-latest
+# .github/workflows/data.yml  (of je bestaande ETL workflow)
+# ... bovenliggende config ongewijzigd ...
 
+jobs:
+  etl:
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # nodig voor nette commits/pushes
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
+      # --- hier draaien jouw bestaande ETL-stappen ---
+      # Stel dat jouw ETL twee JSON's oplevert in /tmp:
+      #   /tmp/cross.json     (laatste-periode cross-section)
+      #   /tmp/timeseries.json (records[].series[] timeseries)
+      # Pas dit aan indien jouw ETL andere paden gebruikt.
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install requests
-
-      - name: Run ETL (Eurostat TEINA230)
-        run: python etl/teina230.py
-
-      # Optioneel: bekijk even wat er veranderd is
-      - name: Show git status
-        run: |
-          git status
-          git diff --stat || true
-
-      - name: Configure git user (safe)
+      - name: Canonicalize outputs and update manifest
+        shell: bash
         run: |
           set -euxo pipefail
-          if [[ "$GITHUB_ACTOR" == "github-actions[bot]" ]]; then
-            GIT_USER_NAME="github-actions[bot]"
-            GIT_USER_EMAIL="41898282+github-actions[bot]@users.noreply.github.com"
-          else
-            GIT_USER_NAME="${GITHUB_ACTOR}"
-            GIT_USER_EMAIL="${GITHUB_ACTOR}@users.noreply.github.com"
+
+          DATE_UTC="$(date -u +%Y-%m-%d)"
+          TS_ISO="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          SNAP_DIR="data/snapshots/${DATE_UTC}"
+          TIME_DIR="data/timeseries/${DATE_UTC}"
+          mkdir -p "${SNAP_DIR}" "${TIME_DIR}"
+
+          # 1) Als je ETL nog eu_debt.json produceert, hernoem dat structureel:
+          #    (laatste-periode / cross-section)
+          if [[ -f "${SNAP_DIR}/eu_debt.json" ]]; then
+            mv -f "${SNAP_DIR}/eu_debt.json" "${SNAP_DIR}/teina230.json"
           fi
-          git config user.name  "$GIT_USER_NAME"
-          git config user.email "$GIT_USER_EMAIL"
 
-      - name: Commit data changes (rebase-safe)
-        run: |
-          set -euxo pipefail
+          # 2) Schrijf canonical outputs (pas bronpaden aan jouw ETL):
+          #    (hier als voorbeeld vanuit /tmp)
+          if [[ -f /tmp/cross.json ]]; then
+            cp -f /tmp/cross.json "${SNAP_DIR}/teina230.json"
+          fi
+          if [[ -f /tmp/timeseries.json ]]; then
+            cp -f /tmp/timeseries.json "${TIME_DIR}/teina230.json"
+          fi
+
+          # 3) Veiligheidscheck: minstens één van de twee moet bestaan
+          test -f "${SNAP_DIR}/teina230.json" -o -f "${TIME_DIR}/teina230.json"
+
+          # 4) Manifest bijwerken (compact, dataset-gericht)
+          #    We lezen waar mogelijk velden uit de JSON.
+          jq_bin="jq"
+          latest_period=""
+          unit_val=""
+          if [[ -f "${SNAP_DIR}/teina230.json" ]]; then
+            latest_period="$($jq_bin -r '.latest_period // .records[0].time // empty' "${SNAP_DIR}/teina230.json" || true)"
+            unit_val="$($jq_bin -r '.unit // .records[0].unit // empty' "${SNAP_DIR}/teina230.json" || true)"
+          elif [[ -f "${TIME_DIR}/teina230.json" ]]; then
+            latest_period="$($jq_bin -r '.latest_period // .records[0].series[-1].time // empty' "${TIME_DIR}/teina230.json" || true)"
+            unit_val="$($jq_bin -r '.unit // .records[0].unit // empty' "${TIME_DIR}/teina230.json" || true)"
+          fi
+
+          mkdir -p data
+          $jq_bin -n \
+            --arg ts "${TS_ISO}" \
+            --arg snap_path "${SNAP_DIR}/teina230.json" \
+            --arg time_path "${TIME_DIR}/teina230.json" \
+            --arg latest "${latest_period}" \
+            --arg unit "${unit_val}" \
+            '{
+              datasets: {
+                teina230: {
+                  updated_at: $ts,
+                  latest_period: ($latest // ""),
+                  unit: ($unit // ""),
+                  latest_snapshot: ($snap_path | select(. != "")),
+                  latest_timeseries: ($time_path | select(. != ""))
+                }
+              }
+            }' > data/manifest.json
+
+          # 5) Git config + commit
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -A data/
-          if git diff --cached --quiet; then
-            echo "No data changes to commit."
-            exit 0
-          fi
+          git commit -m "chore(data): update Eurostat TEINA230 outputs • ${TS_ISO}" || echo "No changes to commit"
 
-            ts="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-          git commit -m "chore(data): update Eurostat TEINA230 outputs • ${ts}"
-
-          # Haal laatste remote op en rebase onze commit erbovenop
-          git pull --rebase origin "${GITHUB_REF_NAME}"
-
-          # Push de gerebase-de HEAD naar dezelfde branch
-          git push origin HEAD:"${GITHUB_REF_NAME}"
-
-
-      # Altijd handig: upload ook als artifact om direct te downloaden
-      - name: Upload data artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: eurostat-teina230-data
-          path: |
-            data/latest/eu_debt.json
-            data/latest/manifest.json
-            data/timeseries/eu_debt_12q.json
-            data/snapshots/**/eu_debt.json
+      - name: Push
+        run: |
+          set -euxo pipefail
+          git pull --rebase
+          git push

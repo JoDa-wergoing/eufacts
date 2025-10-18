@@ -2,15 +2,16 @@
 """
 ETL voor Eurostat TEINA230 — General government gross debt (% of GDP), quarterly.
 
-Functies:
+Doet het volgende:
 - Haalt de laatste 12 kwartalen op via Eurostat 1.0 JSON API.
-- Selecteert programmatisch het meest recente kwartaal voor 'latest'.
-- Bewaart tevens alle 12 kwartalen als timeseries per land.
-- Schrijft outputs:
-  - data/latest/eu_debt.json                (latest, per land)
-  - data/timeseries/eu_debt_12q.json        (12 kwartalen timeseries, per land)
-  - data/snapshots/YYYY-MM-DD/eu_debt.json  (snapshot van 'latest')
-  - data/latest/manifest.json               (metadata + hashes)
+- Bouwt 'latest' (laatste periode per land) én 'timeseries' (12 kwartalen per land).
+- Schrijft outputs met canonieke, dataset-gedreven naamgeving:
+  - data/snapshots/YYYY-MM-DD/teina230.json         (cross-section snapshot)
+  - data/timeseries/YYYY-MM-DD/teina230.json        (timeseries snapshot)
+  - data/latest/teina230.json                        (latest alias - cross-section)
+  - data/latest/teina230-timeseries.json             (latest alias - timeseries)
+  - data/latest/teina230_timeseries.json             (compat underscore alias)
+  - data/latest/manifest.json                        (metadata + hashes)
 """
 
 import sys
@@ -29,16 +30,28 @@ BASE_URL = "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data"
 EUROSTAT_URL = f"{BASE_URL}/{DATASET_ID}?lastTimePeriod=12"
 TIMEOUT_S = 60
 
-# --- PADEN ROBUUST MAKEN ---
+# --- Paden ---
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent  # <repo> (ouder van etl/)
 OUT_DIR = REPO_ROOT / "data"
 LATEST_DIR = OUT_DIR / "latest"
-SNAP_DIR = OUT_DIR / "snapshots"
-TS_DIR = OUT_DIR / "timeseries"
+SNAPSHOTS_DIR = OUT_DIR / "snapshots"
+TIMESERIES_DIR = OUT_DIR / "timeseries"
 
-JSON_LATEST = LATEST_DIR / "eu_debt.json"
-JSON_TS = TS_DIR / "eu_debt_12q.json"
+# Dated folders
+DATE_TODAY = datetime.now(timezone.utc).date().isoformat()
+SNAP_DIR = SNAPSHOTS_DIR / DATE_TODAY
+TS_DIR = TIMESERIES_DIR / DATE_TODAY
+
+# Canonical filenames (dataset-id)
+SNAP_PATH = SNAP_DIR / f"{DATASET_ID}.json"           # data/snapshots/YYYY-MM-DD/teina230.json
+TS_PATH = TS_DIR / f"{DATASET_ID}.json"               # data/timeseries/YYYY-MM-DD/teina230.json
+
+# Latest aliases
+LATEST_CROSS = LATEST_DIR / f"{DATASET_ID}.json"                 # data/latest/teina230.json
+LATEST_TS_HYPHEN = LATEST_DIR / f"{DATASET_ID}-timeseries.json"  # data/latest/teina230-timeseries.json
+LATEST_TS_UNDERS = LATEST_DIR / f"{DATASET_ID}_timeseries.json"  # data/latest/teina230_timeseries.json
+
 MANIFEST_OUT = LATEST_DIR / "manifest.json"
 
 # ---------- Logging ----------
@@ -93,7 +106,7 @@ def _build_dim_meta(cube: Dict[str, Any]) -> Tuple[List[str], List[int], Dict[st
         }
     return dim_ids, size, dim_meta
 
-def _choose_pct_unit(records: List[Dict[str, Any]]) -> str:
+def _choose_pct_unit(records: List[Dict[str, Any]]) -> str | None:
     """Kies unit-code die % of GDP representeert."""
     units_present = sorted({r["unit_code"] for r in records if r.get("unit_code")})
     # 1) voorkeurscodes
@@ -118,8 +131,8 @@ def _choose_pct_unit(records: List[Dict[str, Any]]) -> str:
 def parse_latest_and_timeseries(cube: Dict[str, Any]) -> Tuple[List[Dict[str, Any]], Dict[str, Any], Dict[str, Any]]:
     """
     Parse de kubus:
-    - 'latest' records: enkel meest recente kwartaal (per geo, 1 unit)
-    - 'timeseries' per geo: alle kwartalen beschikbaar (12), zelfde unit-filter
+    - 'latest' records: enkel meest recente kwartaal voor elk geo (1 unit)
+    - 'timeseries' per geo: alle (max 12) kwartalen, zelfde unit-filter
 
     Return:
         latest_records (list),
@@ -170,7 +183,7 @@ def parse_latest_and_timeseries(cube: Dict[str, Any]) -> Tuple[List[Dict[str, An
     latest_records = [r for r in all_records if r.get("time_pos") == latest_time_pos]
     latest_records.sort(key=lambda x: (x["value"] is None, x["value"]), reverse=True)
 
-    latest_output = []
+    latest_output: List[Dict[str, Any]] = []
     for r in latest_records:
         latest_output.append({
             "country_code": r["geo_code"],
@@ -275,51 +288,52 @@ def main():
     latest_obj = build_latest_object(latest_records, EUROSTAT_URL, DATASET_ID, meta)
     ts_obj = build_timeseries_object(series_by_geo, EUROSTAT_URL, DATASET_ID, meta)
 
-    # 4) Write latest + timeseries (altijd onder <repo>/data)
-    write_json(JSON_LATEST, latest_obj)
-    write_json(JSON_TS, ts_obj)
+    # 4) Write dated snapshots
+    write_json(SNAP_PATH, latest_obj)
+    write_json(TS_PATH, ts_obj)
 
-    # 5) Snapshot (latest)
-    today = datetime.now(timezone.utc).date().isoformat()
-    snap_dir = SNAP_DIR / today
-    snap_dir.mkdir(parents=True, exist_ok=True)
-    snap_path = snap_dir / "eu_debt.json"
-    write_json(snap_path, latest_obj)
+    # 5) Write latest aliases
+    LATEST_DIR.mkdir(parents=True, exist_ok=True)
+    # Cross-section latest
+    write_json(LATEST_CROSS, latest_obj)
+    # Timeseries latest (hyphen + underscore)
+    write_json(LATEST_TS_HYPHEN, ts_obj)
+    write_json(LATEST_TS_UNDERS, ts_obj)
 
-    # 6) Manifest
+    # 6) Manifest (compact maar informatief)
+    try:
+        hash_snap = sha256_file(SNAP_PATH)
+        hash_ts = sha256_file(TS_PATH)
+        hash_latest = sha256_file(LATEST_CROSS)
+        hash_latest_ts = sha256_file(LATEST_TS_HYPHEN)
+    except Exception:
+        # hashes zijn nice-to-have; breek niet af
+        hash_snap = hash_ts = hash_latest = hash_latest_ts = None
+
     manifest = {
-        "dataset": DATASET_ID.upper(),
-        "latest_file": str(JSON_LATEST.relative_to(OUT_DIR)),
-        "timeseries_file": str(JSON_TS.relative_to(OUT_DIR)),
-        "snapshot_file": str(snap_path.relative_to(OUT_DIR)),
-        "source_url": EUROSTAT_URL,
-        "generated_at": datetime.now(timezone.utc).isoformat(),
-        "record_count_latest": len(latest_obj["records"]),
-        "record_count_timeseries": sum(len(x["series"]) for x in ts_obj["records"]),
-        "latest_period": latest_obj.get("latest_period"),
-        "hash_latest": sha256_file(JSON_LATEST),
-        "hash_timeseries": sha256_file(JSON_TS),
-        "hash_snapshot": sha256_file(snap_path),
-        "schema_latest": {
-            "fields": [
-                {"name": "country_code", "type": "string"},
-                {"name": "country", "type": "string"},
-                {"name": "time", "type": "string"},
-                {"name": "value_pct_gdp", "type": "number"},
-            ]
-        },
-        "schema_timeseries": {
-            "fields": [
-                {"name": "country_code", "type": "string"},
-                {"name": "country", "type": "string"},
-                {"name": "unit", "type": "string"},
-                {"name": "series", "type": "array"},  # lijst van {time, value_pct_gdp}
-            ]
-        },
-        "notes": [
-            "Unit filtered to percentage-of-GDP (heuristic on unit codes/labels).",
-            "Retrieved last 12 quarters and reduced to latest quarter for 'latest'."
-        ],
+        "datasets": {
+            DATASET_ID: {
+                "updated_at": datetime.now(timezone.utc).isoformat(),
+                "latest_period": latest_obj.get("latest_period"),
+                "unit": latest_obj.get("unit") or ts_obj.get("unit"),
+                "latest_snapshot": str(SNAP_PATH.relative_to(OUT_DIR)),
+                "latest_timeseries": str(TS_PATH.relative_to(OUT_DIR)),
+                "latest_files": {
+                    "cross_section": str(LATEST_CROSS.relative_to(OUT_DIR)),
+                    "timeseries_hyphen": str(LATEST_TS_HYPHEN.relative_to(OUT_DIR)),
+                    "timeseries_underscore": str(LATEST_TS_UNDERS.relative_to(OUT_DIR)),
+                },
+                "hashes": {
+                    "snapshot": hash_snap,
+                    "timeseries": hash_ts,
+                    "latest_cross": hash_latest,
+                    "latest_timeseries": hash_latest_ts,
+                },
+                "source_url": EUROSTAT_URL,
+                "record_count_latest": len(latest_obj["records"]),
+                "record_count_timeseries": sum(len(x["series"]) for x in ts_obj["records"]),
+            }
+        }
     }
     write_json(MANIFEST_OUT, manifest)
     log.info("Manifest written to %s", MANIFEST_OUT)

@@ -1,4 +1,3 @@
-# .github/workflows/pages.yml
 name: Deploy website (site/ + data/) to GitHub Pages
 
 on:
@@ -21,43 +20,21 @@ concurrency:
 
 jobs:
   deploy:
+    runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Prepare site folder (preserve HTML + copy data + build latest aliases)
+      - name: Prepare site folder (copy data under site/)
         shell: bash
         run: |
           set -euxo pipefail
-
           test -d site
-          mkdir -p site/data/latest
-
-          # Publiceer ruwe data-mappen ook onder /site/data/ (handig voor debug/download)
+          mkdir -p site/data
           rsync -a --delete data/ site/data/
-
-          # Bouw latest aliassen: pak per bestandsnaam de nieuwste JSON
-          mapfile -t ALL_JSONS < <(ls -1t data/snapshots/*/*.json data/timeseries/*/*.json 2>/dev/null || true)
-          declare -A seen=()
-          for f in "${ALL_JSONS[@]}"; do
-            base="$(basename "$f")"
-            if [[ -z "${seen[$base]+x}" ]]; then
-              cp -f "$f" "site/data/latest/$base"
-              seen["$base"]=1
-            fi
-          done
-
-          # Timeseries alias: hyphen <-> underscore
-          if [[ -f "site/data/latest/teina230_timeseries.json" && ! -f "site/data/latest/teina230-timeseries.json" ]]; then
-            cp -f "site/data/latest/teina230_timeseries.json" "site/data/latest/teina230-timeseries.json"
-          fi
-          if [[ -f "site/data/latest/teina230-timeseries.json" && ! -f "site/data/latest/teina230_timeseries.json" ]]; then
-            cp -f "site/data/latest/teina230-timeseries.json" "site/data/latest/teina230_timeseries.json"
-          fi
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

@@ -1,58 +1,25 @@
 {
-  "dataset": "TEINA230",
-  "latest_file": "latest/eu_debt.json",
-  "timeseries_file": "timeseries/eu_debt_12q.json",
-  "snapshot_file": "snapshots/2025-10-16/eu_debt.json",
-  "source_url": "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/teina230?lastTimePeriod=12",
-  "generated_at": "2025-10-16T07:03:22.068976+00:00",
-  "record_count_latest": 30,
-  "record_count_timeseries": 360,
-  "latest_period": "2025-Q1",
-  "hash_latest": "sha256:6d2e7a8d6b2a9b31e6d134a0f113ff0ef2763a1b80281326ad2c8b6e7864e08f",
-  "hash_timeseries": "sha256:cca6906352e19036886ea6171fb53ffdd5612b6cb7c5986fcf23bfeb940ffca9",
-  "hash_snapshot": "sha256:6d2e7a8d6b2a9b31e6d134a0f113ff0ef2763a1b80281326ad2c8b6e7864e08f",
-  "schema_latest": {
-    "fields": [
-      {
-        "name": "country_code",
-        "type": "string"
+  "datasets": {
+    "teina230": {
+      "updated_at": "2025-10-18T07:31:57.097717+00:00",
+      "latest_period": "2025-Q1",
+      "unit": "% of GDP",
+      "latest_snapshot": "snapshots/2025-10-18/teina230.json",
+      "latest_timeseries": "timeseries/2025-10-18/teina230.json",
+      "latest_files": {
+        "cross_section": "latest/teina230.json",
+        "timeseries_hyphen": "latest/teina230-timeseries.json",
+        "timeseries_underscore": "latest/teina230_timeseries.json"
       },
-      {
-        "name": "country",
-        "type": "string"
+      "hashes": {
+        "snapshot": "sha256:f4757ee236bdd1edbce62e21f5387ae88bacc7bd8d9e0f551b75deb4933ed2a9",
+        "timeseries": "sha256:e5032d295cfc51ac6d97893c060f22d3fad6699efb90d6b86b74d62873ece790",
+        "latest_cross": "sha256:f4757ee236bdd1edbce62e21f5387ae88bacc7bd8d9e0f551b75deb4933ed2a9",
+        "latest_timeseries": "sha256:e5032d295cfc51ac6d97893c060f22d3fad6699efb90d6b86b74d62873ece790"
       },
-      {
-        "name": "time",
-        "type": "string"
-      },
-      {
-        "name": "value_pct_gdp",
-        "type": "number"
-      }
-    ]
-  },
-  "schema_timeseries": {
-    "fields": [
-      {
-        "name": "country_code",
-        "type": "string"
-      },
-      {
-        "name": "country",
-        "type": "string"
-      },
-      {
-        "name": "unit",
-        "type": "string"
-      },
-      {
-        "name": "series",
-        "type": "array"
-      }
-    ]
-  },
-  "notes": [
-    "Unit filtered to percentage-of-GDP (heuristic on unit codes/labels).",
-    "Retrieved last 12 quarters and reduced to latest quarter for 'latest'."
-  ]
+      "source_url": "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/teina230?lastTimePeriod=12",
+      "record_count_latest": 30,
+      "record_count_timeseries": 360
+    }
+  }
 }

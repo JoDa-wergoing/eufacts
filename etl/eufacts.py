@@ -54,7 +54,14 @@ DATASETS = [
     },
     {
         "id": "gov_10a_taxag",
-        "description": "Revenue from taxes and social contributions, % of GDP (annual)",
+        "url": (
+        f"{BASE_URL}/gov_10a_taxag"
+        "?freq=A"
+        "&unit=PC_GDP"
+        "&sector=S13"
+        "&lastTimePeriod=12"
+        ),
+        "description": "Total receipts from taxes and social contributions (% of GDP, general government, annual)",
         "last_time_periods": 10,
         "notes_latest": [
             "Eurostat 1.0 API; last 10 years retrieved and reduced to latest year in ETL.",

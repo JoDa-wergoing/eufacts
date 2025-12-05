@@ -294,6 +294,10 @@ function renderLineMulti(datasets, timeUnit, valueKey){
     };
     config = { type: 'line', data, options };
   }
+  console.log(datasets)
+  console.log(datasets[0])
+  console.log(datasets[0].data)
+
 
   if (CHART) CHART.destroy();
   CHART = new Chart(ctx, config);

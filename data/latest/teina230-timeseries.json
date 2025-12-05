@@ -2,9 +2,9 @@
   "dataset": "TEINA230",
   "description": "General government gross debt, % of GDP (quarterly, last 12 quarters)",
   "source_url": "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/teina230?lastTimePeriod=12",
-  "updated_at": "2025-10-18T07:31:57.081167+00:00",
+  "updated_at": "2025-12-04T09:53:02.743087+00:00",
   "unit": "% of GDP",
-  "latest_period": "2025-Q1",
+  "latest_period": "2025-Q2",
   "records": [
     {
       "country_code": "AT",
@@ -12,16 +12,12 @@
       "unit": "% of GDP",
       "series": [
         {
-          "time": "2022-Q2",
-          "value_pct_gdp": 82.5
-        },
-        {
           "time": "2022-Q3",
-          "value_pct_gdp": 81.0
+          "value_pct_gdp": 80.9
         },
         {
           "time": "2022-Q4",
-          "value_pct_gdp": 78.4
+          "value_pct_gdp": 78.1
         },
         {
           "time": "2023-Q1",
@@ -29,35 +25,39 @@
         },
         {
           "time": "2023-Q2",
-          "value_pct_gdp": 78.4
+          "value_pct_gdp": 78.3
         },
         {
           "time": "2023-Q3",
-          "value_pct_gdp": 78.6
+          "value_pct_gdp": 78.2
         },
         {
           "time": "2023-Q4",
-          "value_pct_gdp": 78.5
+          "value_pct_gdp": 77.8
         },
         {
           "time": "2024-Q1",
-          "value_pct_gdp": 80.8
+          "value_pct_gdp": 79.9
         },
         {
           "time": "2024-Q2",
-          "value_pct_gdp": 82.8
+          "value_pct_gdp": 81.5
         },
         {
           "time": "2024-Q3",
-          "value_pct_gdp": 83.0
+          "value_pct_gdp": 81.6
         },
         {
           "time": "2024-Q4",
-          "value_pct_gdp": 81.4
+          "value_pct_gdp": 79.9
         },
         {
           "time": "2025-Q1",
-          "value_pct_gdp": 84.9
+          "value_pct_gdp": 83.1
+        },
+        {
+          "time": "2025-Q2",
+          "value_pct_gdp": 82.3
         }
       ]
     },
@@ -67,52 +67,52 @@
       "unit": "% of GDP",
       "series": [
         {
-          "time": "2022-Q2",
-          "value_pct_gdp": 107.4
-        },
-        {
           "time": "2022-Q3",
-          "value_pct_gdp": 104.7
+          "value_pct_gdp": 105.5
         },
         {
           "time": "2022-Q4",
-          "value_pct_gdp": 102.7
+          "value_pct_gdp": 103.4
         },
         {
           "time": "2023-Q1",
-          "value_pct_gdp": 104.1
+          "value_pct_gdp": 104.5
         },
         {
           "time": "2023-Q2",
-          "value_pct_gdp": 103.3
-        },
-        {
-          "time": "2023-Q3",
-          "value_pct_gdp": 105.4
-        },
-        {
-          "time": "2023-Q4",
           "value_pct_gdp": 103.2
         },
         {
+          "time": "2023-Q3",
+          "value_pct_gdp": 105.0
+        },
+        {
+          "time": "2023-Q4",
+          "value_pct_gdp": 102.4
+        },
+        {
           "time": "2024-Q1",
-          "value_pct_gdp": 106.6
+          "value_pct_gdp": 105.5
         },
         {
           "time": "2024-Q2",
-          "value_pct_gdp": 106.6
+          "value_pct_gdp": 105.5
         },
         {
           "time": "2024-Q3",
-          "value_pct_gdp": 105.7
+          "value_pct_gdp": 104.8
         },
         {
           "time": "2024-Q4",
-          "value_pct_gdp": 104.7
+          "value_pct_gdp": 103.9
         },
         {
           "time": "2025-Q1",
-          "value_pct_gdp": 106.8
+          "value_pct_gdp": 106.0
+        },
+        {
+          "time": "2025-Q2",
+          "value_pct_gdp": 106.2
         }
       ]
     },
@@ -121,10 +121,6 @@
       "country": "Bulgaria",
       "unit": "% of GDP",
       "series": [
-        {
-          "time": "2022-Q2",
-          "value_pct_gdp": 21.2
-        },
         {
           "time": "2022-Q3",
           "value_pct_gdp": 23.0
@@ -143,7 +139,7 @@
         },
         {
           "time": "2023-Q3",
-          "value_pct_gdp": 20.9
+          "value_pct_gdp": 21.0
         },
         {
           "time": "2023-Q4",
@@ -155,19 +151,23 @@
         },
         {
           "time": "2024-Q2",
-          "value_pct_gdp": 22.1
+          "value_pct_gdp": 22.0
         },
         {
           "time": "2024-Q3",
-          "value_pct_gdp": 24.6
+          "value_pct_gdp": 24.3
         },
         {
           "time": "2024-Q4",
-          "value_pct_gdp": 24.1
+          "value_pct_gdp": 23.8
         },
         {
           "time": "2025-Q1",
-          "value_pct_gdp": 23.9
+          "value_pct_gdp": 23.7
+        },
+        {
+          "time": "2025-Q2",
+          "value_pct_gdp": 26.3
         }
       ]
     },
@@ -177,52 +177,52 @@
       "unit": "% of GDP",
       "series": [
         {
-          "time": "2022-Q2",
-          "value_pct_gdp": 89.5
-        },
-        {
           "time": "2022-Q3",
-          "value_pct_gdp": 85.4
+          "value_pct_gdp": 84.8
         },
         {
           "time": "2022-Q4",
-          "value_pct_gdp": 81.1
+          "value_pct_gdp": 80.3
         },
         {
           "time": "2023-Q1",
-          "value_pct_gdp": 78.6
+          "value_pct_gdp": 77.5
         },
         {
           "time": "2023-Q2",
-          "value_pct_gdp": 80.6
+          "value_pct_gdp": 78.7
         },
         {
           "time": "2023-Q3",
-          "value_pct_gdp": 75.1
+          "value_pct_gdp": 73.1
         },
         {
           "time": "2023-Q4",
-          "value_pct_gdp": 73.6
+          "value_pct_gdp": 71.1
         },
         {
           "time": "2024-Q1",
-          "value_pct_gdp": 72.5
+          "value_pct_gdp": 69.8
         },
         {
           "time": "2024-Q2",
-          "value_pct_gdp": 70.2
+          "value_pct_gdp": 67.7
         },
         {
           "time": "2024-Q3",
-          "value_pct_gdp": 69.2
+          "value_pct_gdp": 66.7
         },
         {
           "time": "2024-Q4",
-          "value_pct_gdp": 65.1
+          "value_pct_gdp": 62.8
         },
         {
           "time": "2025-Q1",
-          "value_pct_gdp": 64.3
+          "value_pct_gdp": 62.1
+        },
+        {
+          "time": "2025-Q2",
+          "value_pct_gdp": 61.2
         }
       ]
     },
@@ -231,10 +231,6 @@
       "country": "Czechia",
       "unit": "% of GDP",
       "series": [
-        {
-          "time": "2022-Q2",
-          "value_pct_gdp": 41.9
-        },
         {
           "time": "2022-Q3",
           "value_pct_gdp": 43.5
@@ -277,7 +273,11 @@
         },
         {
           "time": "2025-Q1",
-          "value_pct_gdp": 43.4
+          "value_pct_gdp": 43.3
+        },
+        {
+          "time": "2025-Q2",
+          "value_pct_gdp": 43.8
         }
       ]
     },
@@ -287,52 +287,52 @@
       "unit": "% of GDP",
       "series": [
         {
-          "time": "2022-Q2",
-          "value_pct_gdp": 66.5
-        },
-        {
           "time": "2022-Q3",
-          "value_pct_gdp": 65.7
+          "value_pct_gdp": 65.2
         },
         {
           "time": "2022-Q4",
-          "value_pct_gdp": 65.0
+          "value_pct_gdp": 64.4
         },
         {
           "time": "2023-Q1",
-          "value_pct_gdp": 64.6
+          "value_pct_gdp": 63.9
         },
         {
           "time": "2023-Q2",
-          "value_pct_gdp": 63.6
+          "value_pct_gdp": 63.0
         },
         {
           "time": "2023-Q3",
-          "value_pct_gdp": 63.8
+          "value_pct_gdp": 63.2
         },
         {
           "time": "2023-Q4",
-          "value_pct_gdp": 62.9
+          "value_pct_gdp": 62.3
         },
         {
           "time": "2024-Q1",
-          "value_pct_gdp": 62.6
+          "value_pct_gdp": 62.1
         },
         {
           "time": "2024-Q2",
-          "value_pct_gdp": 62.0
+          "value_pct_gdp": 61.6
         },
         {
           "time": "2024-Q3",
-          "value_pct_gdp": 62.4
+          "value_pct_gdp": 62.0
         },
         {
           "time": "2024-Q4",
-          "value_pct_gdp": 62.5
+          "value_pct_gdp": 62.2
         },
         {
           "time": "2025-Q1",
-          "value_pct_gdp": 62.3
+          "value_pct_gdp": 62.0
+        },
+        {
+          "time": "2025-Q2",
+          "value_pct_gdp": 62.4
         }
       ]
     },
@@ -341,10 +341,6 @@
       "country": "Denmark",
       "unit": "% of GDP",
       "series": [
-        {
-          "time": "2022-Q2",
-          "value_pct_gdp": 34.7
-        },
         {
           "time": "2022-Q3",
           "value_pct_gdp": 33.7
@@ -388,6 +384,10 @@
         {
           "time": "2025-Q1",
           "value_pct_gdp": 29.9
+        },
+        {
+          "time": "2025-Q2",
+          "value_pct_gdp": 29.7
         }
       ]
     },
@@ -397,52 +397,52 @@
       "unit": "% of GDP",
       "series": [
         {
-          "time": "2022-Q2",
-          "value_pct_gdp": 92.4
-        },
-        {
           "time": "2022-Q3",
-          "value_pct_gdp": 90.9
+          "value_pct_gdp": 90.7
         },
         {
           "time": "2022-Q4",
-          "value_pct_gdp": 89.5
-        },
-        {
-          "time": "2023-Q1",
           "value_pct_gdp": 89.3
         },
         {
+          "time": "2023-Q1",
+          "value_pct_gdp": 89.0
+        },
+        {
           "time": "2023-Q2",
-          "value_pct_gdp": 88.8
+          "value_pct_gdp": 88.5
         },
         {
           "time": "2023-Q3",
-          "value_pct_gdp": 88.3
+          "value_pct_gdp": 88.0
         },
         {
           "time": "2023-Q4",
-          "value_pct_gdp": 87.3
+          "value_pct_gdp": 87.0
         },
         {
           "time": "2024-Q1",
-          "value_pct_gdp": 87.8
-        },
-        {
-          "time": "2024-Q2",
-          "value_pct_gdp": 88.0
-        },
-        {
-          "time": "2024-Q3",
-          "value_pct_gdp": 88.0
-        },
-        {
-          "time": "2024-Q4",
           "value_pct_gdp": 87.4
         },
         {
+          "time": "2024-Q2",
+          "value_pct_gdp": 87.7
+        },
+        {
+          "time": "2024-Q3",
+          "value_pct_gdp": 87.7
+        },
+        {
+          "time": "2024-Q4",
+          "value_pct_gdp": 87.1
+        },
+        {
           "time": "2025-Q1",
-          "value_pct_gdp": 88.0
+          "value_pct_gdp": 87.7
+        },
+        {
+          "time": "2025-Q2",
+          "value_pct_gdp": 88.2
         }
       ]
     },
@@ -452,16 +452,12 @@
       "unit": "% of GDP",
       "series": [
         {
-          "time": "2022-Q2",
-          "value_pct_gdp": 17.6
-        },
-        {
           "time": "2022-Q3",
-          "value_pct_gdp": 16.6
+          "value_pct_gdp": 16.7
         },
         {
           "time": "2022-Q4",
-          "value_pct_gdp": 19.1
+          "value_pct_gdp": 19.2
         },
         {
           "time": "2023-Q1",
@@ -481,23 +477,27 @@
         },
         {
           "time": "2024-Q1",
-          "value_pct_gdp": 24.1
-        },
-        {
-          "time": "2024-Q2",
-          "value_pct_gdp": 23.8
-        },
-        {
-          "time": "2024-Q3",
           "value_pct_gdp": 24.0
         },
         {
-          "time": "2024-Q4",
+          "time": "2024-Q2",
           "value_pct_gdp": 23.6
         },
         {
+          "time": "2024-Q3",
+          "value_pct_gdp": 23.8
+        },
+        {
+          "time": "2024-Q4",
+          "value_pct_gdp": 23.5
+        },
+        {
           "time": "2025-Q1",
-          "value_pct_gdp": 24.1
+          "value_pct_gdp": 23.9
+        },
+        {
+          "time": "2025-Q2",
+          "value_pct_gdp": 23.2
         }
       ]
     },
@@ -506,10 +506,6 @@
       "country": "Greece",
       "unit": "% of GDP",
       "series": [
-        {
-          "time": "2022-Q2",
-          "value_pct_gdp": 188.2
-        },
         {
           "time": "2022-Q3",
           "value_pct_gdp": 181.6
@@ -552,7 +548,11 @@
         },
         {
           "time": "2025-Q1",
-          "value_pct_gdp": 152.5
+          "value_pct_gdp": 152.4
+        },
+        {
+          "time": "2025-Q2",
+          "value_pct_gdp": 151.2
         }
       ]
     },
@@ -562,20 +562,16 @@
       "unit": "% of GDP",
       "series": [
         {
-          "time": "2022-Q2",
-          "value_pct_gdp": 113.0
-        },
-        {
           "time": "2022-Q3",
-          "value_pct_gdp": 112.2
+          "value_pct_gdp": 112.1
         },
         {
           "time": "2022-Q4",
-          "value_pct_gdp": 109.5
+          "value_pct_gdp": 109.3
         },
         {
           "time": "2023-Q1",
-          "value_pct_gdp": 109.0
+          "value_pct_gdp": 108.9
         },
         {
           "time": "2023-Q2",
@@ -583,11 +579,11 @@
         },
         {
           "time": "2023-Q3",
-          "value_pct_gdp": 107.4
+          "value_pct_gdp": 107.3
         },
         {
           "time": "2023-Q4",
-          "value_pct_gdp": 105.1
+          "value_pct_gdp": 105.2
         },
         {
           "time": "2024-Q1",
@@ -595,19 +591,23 @@
         },
         {
           "time": "2024-Q2",
-          "value_pct_gdp": 105.3
+          "value_pct_gdp": 105.2
         },
         {
           "time": "2024-Q3",
-          "value_pct_gdp": 104.4
+          "value_pct_gdp": 104.2
         },
         {
           "time": "2024-Q4",
-          "value_pct_gdp": 101.8
+          "value_pct_gdp": 101.6
         },
         {
           "time": "2025-Q1",
-          "value_pct_gdp": 103.5
+          "value_pct_gdp": 103.4
+        },
+        {
+          "time": "2025-Q2",
+          "value_pct_gdp": 103.4
         }
       ]
     },
@@ -617,52 +617,52 @@
       "unit": "% of GDP",
       "series": [
         {
-          "time": "2022-Q2",
-          "value_pct_gdp": 85.1
-        },
-        {
           "time": "2022-Q3",
-          "value_pct_gdp": 83.7
+          "value_pct_gdp": 83.5
         },
         {
           "time": "2022-Q4",
-          "value_pct_gdp": 82.5
+          "value_pct_gdp": 82.3
         },
         {
           "time": "2023-Q1",
-          "value_pct_gdp": 82.4
+          "value_pct_gdp": 82.2
         },
         {
           "time": "2023-Q2",
-          "value_pct_gdp": 82.0
+          "value_pct_gdp": 81.7
         },
         {
           "time": "2023-Q3",
-          "value_pct_gdp": 81.5
-        },
-        {
-          "time": "2023-Q4",
-          "value_pct_gdp": 80.8
-        },
-        {
-          "time": "2024-Q1",
           "value_pct_gdp": 81.2
         },
         {
-          "time": "2024-Q2",
-          "value_pct_gdp": 81.5
+          "time": "2023-Q4",
+          "value_pct_gdp": 80.5
         },
         {
-          "time": "2024-Q3",
-          "value_pct_gdp": 81.5
-        },
-        {
-          "time": "2024-Q4",
+          "time": "2024-Q1",
           "value_pct_gdp": 81.0
         },
         {
+          "time": "2024-Q2",
+          "value_pct_gdp": 81.2
+        },
+        {
+          "time": "2024-Q3",
+          "value_pct_gdp": 81.3
+        },
+        {
+          "time": "2024-Q4",
+          "value_pct_gdp": 80.7
+        },
+        {
           "time": "2025-Q1",
-          "value_pct_gdp": 81.8
+          "value_pct_gdp": 81.5
+        },
+        {
+          "time": "2025-Q2",
+          "value_pct_gdp": 81.9
         }
       ]
     },
@@ -672,12 +672,8 @@
       "unit": "% of GDP",
       "series": [
         {
-          "time": "2022-Q2",
-          "value_pct_gdp": 73.2
-        },
-        {
           "time": "2022-Q3",
-          "value_pct_gdp": 72.5
+          "value_pct_gdp": 72.4
         },
         {
           "time": "2022-Q4",
@@ -685,7 +681,7 @@
         },
         {
           "time": "2023-Q1",
-          "value_pct_gdp": 73.5
+          "value_pct_gdp": 73.4
         },
         {
           "time": "2023-Q2",
@@ -693,7 +689,7 @@
         },
         {
           "time": "2023-Q3",
-          "value_pct_gdp": 74.6
+          "value_pct_gdp": 74.5
         },
         {
           "time": "2023-Q4",
@@ -705,7 +701,7 @@
         },
         {
           "time": "2024-Q2",
-          "value_pct_gdp": 80.7
+          "value_pct_gdp": 80.6
         },
         {
           "time": "2024-Q3",
@@ -713,11 +709,15 @@
         },
         {
           "time": "2024-Q4",
-          "value_pct_gdp": 82.1
+          "value_pct_gdp": 82.5
         },
         {
           "time": "2025-Q1",
-          "value_pct_gdp": 83.7
+          "value_pct_gdp": 84.2
+        },
+        {
+          "time": "2025-Q2",
+          "value_pct_gdp": 88.4
         }
       ]
     },
@@ -726,10 +726,6 @@
       "country": "France",
       "unit": "% of GDP",
       "series": [
-        {
-          "time": "2022-Q2",
-          "value_pct_gdp": 112.9
-        },
         {
           "time": "2022-Q3",
           "value_pct_gdp": 113.1
@@ -764,7 +760,7 @@
         },
         {
           "time": "2024-Q3",
-          "value_pct_gdp": 113.6
+          "value_pct_gdp": 113.7
         },
         {
           "time": "2024-Q4",
@@ -773,6 +769,10 @@
         {
           "time": "2025-Q1",
           "value_pct_gdp": 114.1
+        },
+        {
+          "time": "2025-Q2",
+          "value_pct_gdp": 115.8
         }
       ]
     },
@@ -782,12 +782,8 @@
       "unit": "% of GDP",
       "series": [
         {
-          "time": "2022-Q2",
-          "value_pct_gdp": 72.9
-        },
-        {
           "time": "2022-Q3",
-          "value_pct_gdp": 70.2
+          "value_pct_gdp": 70.3
         },
         {
           "time": "2022-Q4",
@@ -795,39 +791,43 @@
         },
         {
           "time": "2023-Q1",
-          "value_pct_gdp": 69.1
+          "value_pct_gdp": 68.9
         },
         {
           "time": "2023-Q2",
-          "value_pct_gdp": 65.8
+          "value_pct_gdp": 65.3
         },
         {
           "time": "2023-Q3",
-          "value_pct_gdp": 63.3
+          "value_pct_gdp": 62.5
         },
         {
           "time": "2023-Q4",
-          "value_pct_gdp": 61.8
+          "value_pct_gdp": 60.9
         },
         {
           "time": "2024-Q1",
-          "value_pct_gdp": 62.0
+          "value_pct_gdp": 61.1
         },
         {
           "time": "2024-Q2",
-          "value_pct_gdp": 60.0
+          "value_pct_gdp": 59.3
         },
         {
           "time": "2024-Q3",
-          "value_pct_gdp": 59.6
+          "value_pct_gdp": 59.2
         },
         {
           "time": "2024-Q4",
-          "value_pct_gdp": 57.6
+          "value_pct_gdp": 57.4
         },
         {
           "time": "2025-Q1",
-          "value_pct_gdp": 58.4
+          "value_pct_gdp": 58.3
+        },
+        {
+          "time": "2025-Q2",
+          "value_pct_gdp": 57.5
         }
       ]
     },
@@ -837,44 +837,40 @@
       "unit": "% of GDP",
       "series": [
         {
-          "time": "2022-Q2",
-          "value_pct_gdp": 76.4
-        },
-        {
           "time": "2022-Q3",
-          "value_pct_gdp": 75.4
-        },
-        {
-          "time": "2022-Q4",
-          "value_pct_gdp": 73.9
-        },
-        {
-          "time": "2023-Q1",
-          "value_pct_gdp": 75.1
-        },
-        {
-          "time": "2023-Q2",
-          "value_pct_gdp": 74.7
-        },
-        {
-          "time": "2023-Q3",
-          "value_pct_gdp": 74.3
-        },
-        {
-          "time": "2023-Q4",
-          "value_pct_gdp": 73.0
-        },
-        {
-          "time": "2024-Q1",
-          "value_pct_gdp": 75.6
-        },
-        {
-          "time": "2024-Q2",
           "value_pct_gdp": 75.5
         },
         {
+          "time": "2022-Q4",
+          "value_pct_gdp": 74.1
+        },
+        {
+          "time": "2023-Q1",
+          "value_pct_gdp": 75.4
+        },
+        {
+          "time": "2023-Q2",
+          "value_pct_gdp": 75.0
+        },
+        {
+          "time": "2023-Q3",
+          "value_pct_gdp": 74.6
+        },
+        {
+          "time": "2023-Q4",
+          "value_pct_gdp": 73.2
+        },
+        {
+          "time": "2024-Q1",
+          "value_pct_gdp": 76.5
+        },
+        {
+          "time": "2024-Q2",
+          "value_pct_gdp": 76.3
+        },
+        {
           "time": "2024-Q3",
-          "value_pct_gdp": 75.6
+          "value_pct_gdp": 76.1
         },
         {
           "time": "2024-Q4",
@@ -882,7 +878,11 @@
         },
         {
           "time": "2025-Q1",
-          "value_pct_gdp": 75.3
+          "value_pct_gdp": 75.4
+        },
+        {
+          "time": "2025-Q2",
+          "value_pct_gdp": 76.2
         }
       ]
     },
@@ -892,52 +892,52 @@
       "unit": "% of GDP",
       "series": [
         {
-          "time": "2022-Q2",
-          "value_pct_gdp": 49.0
-        },
-        {
           "time": "2022-Q3",
-          "value_pct_gdp": 47.0
+          "value_pct_gdp": 46.8
         },
         {
           "time": "2022-Q4",
-          "value_pct_gdp": 43.2
+          "value_pct_gdp": 42.9
         },
         {
           "time": "2023-Q1",
-          "value_pct_gdp": 42.2
-        },
-        {
-          "time": "2023-Q2",
-          "value_pct_gdp": 41.8
-        },
-        {
-          "time": "2023-Q3",
           "value_pct_gdp": 42.0
         },
         {
+          "time": "2023-Q2",
+          "value_pct_gdp": 41.5
+        },
+        {
+          "time": "2023-Q3",
+          "value_pct_gdp": 41.8
+        },
+        {
           "time": "2023-Q4",
-          "value_pct_gdp": 42.1
+          "value_pct_gdp": 41.8
         },
         {
           "time": "2024-Q1",
-          "value_pct_gdp": 41.1
+          "value_pct_gdp": 40.7
         },
         {
           "time": "2024-Q2",
-          "value_pct_gdp": 40.8
+          "value_pct_gdp": 40.5
         },
         {
           "time": "2024-Q3",
-          "value_pct_gdp": 40.3
+          "value_pct_gdp": 40.0
         },
         {
           "time": "2024-Q4",
-          "value_pct_gdp": 38.7
+          "value_pct_gdp": 38.3
         },
         {
           "time": "2025-Q1",
-          "value_pct_gdp": 34.9
+          "value_pct_gdp": 34.5
+        },
+        {
+          "time": "2025-Q2",
+          "value_pct_gdp": 33.3
         }
       ]
     },
@@ -947,52 +947,52 @@
       "unit": "% of GDP",
       "series": [
         {
-          "time": "2022-Q2",
-          "value_pct_gdp": 143.9
-        },
-        {
           "time": "2022-Q3",
           "value_pct_gdp": 139.9
         },
         {
           "time": "2022-Q4",
-          "value_pct_gdp": 138.3
+          "value_pct_gdp": 138.4
         },
         {
           "time": "2023-Q1",
-          "value_pct_gdp": 137.2
+          "value_pct_gdp": 137.0
         },
         {
           "time": "2023-Q2",
-          "value_pct_gdp": 137.8
+          "value_pct_gdp": 137.5
         },
         {
           "time": "2023-Q3",
-          "value_pct_gdp": 135.5
+          "value_pct_gdp": 135.0
         },
         {
           "time": "2023-Q4",
-          "value_pct_gdp": 134.6
+          "value_pct_gdp": 133.9
         },
         {
           "time": "2024-Q1",
-          "value_pct_gdp": 134.9
+          "value_pct_gdp": 134.2
         },
         {
           "time": "2024-Q2",
-          "value_pct_gdp": 136.6
+          "value_pct_gdp": 136.0
         },
         {
           "time": "2024-Q3",
-          "value_pct_gdp": 136.2
+          "value_pct_gdp": 135.6
         },
         {
           "time": "2024-Q4",
-          "value_pct_gdp": 135.3
+          "value_pct_gdp": 134.9
         },
         {
           "time": "2025-Q1",
-          "value_pct_gdp": 137.9
+          "value_pct_gdp": 137.4
+        },
+        {
+          "time": "2025-Q2",
+          "value_pct_gdp": 138.3
         }
       ]
     },
@@ -1002,24 +1002,20 @@
       "unit": "% of GDP",
       "series": [
         {
-          "time": "2022-Q2",
-          "value_pct_gdp": 39.1
-        },
-        {
           "time": "2022-Q3",
-          "value_pct_gdp": 37.0
+          "value_pct_gdp": 37.2
         },
         {
           "time": "2022-Q4",
-          "value_pct_gdp": 38.1
+          "value_pct_gdp": 38.3
         },
         {
           "time": "2023-Q1",
-          "value_pct_gdp": 37.8
+          "value_pct_gdp": 37.9
         },
         {
           "time": "2023-Q2",
-          "value_pct_gdp": 37.7
+          "value_pct_gdp": 37.6
         },
         {
           "time": "2023-Q3",
@@ -1027,27 +1023,31 @@
         },
         {
           "time": "2023-Q4",
-          "value_pct_gdp": 37.3
+          "value_pct_gdp": 37.1
         },
         {
           "time": "2024-Q1",
-          "value_pct_gdp": 39.1
+          "value_pct_gdp": 38.9
         },
         {
           "time": "2024-Q2",
-          "value_pct_gdp": 37.4
+          "value_pct_gdp": 37.2
         },
         {
           "time": "2024-Q3",
-          "value_pct_gdp": 38.4
+          "value_pct_gdp": 38.0
         },
         {
           "time": "2024-Q4",
-          "value_pct_gdp": 38.2
+          "value_pct_gdp": 38.0
         },
         {
           "time": "2025-Q1",
-          "value_pct_gdp": 40.6
+          "value_pct_gdp": 40.4
+        },
+        {
+          "time": "2025-Q2",
+          "value_pct_gdp": 39.1
         }
       ]
     },
@@ -1057,10 +1057,6 @@
       "unit": "% of GDP",
       "series": [
         {
-          "time": "2022-Q2",
-          "value_pct_gdp": 25.4
-        },
-        {
           "time": "2022-Q3",
           "value_pct_gdp": 24.9
         },
@@ -1070,31 +1066,31 @@
         },
         {
           "time": "2023-Q1",
-          "value_pct_gdp": 28.5
+          "value_pct_gdp": 28.4
         },
         {
           "time": "2023-Q2",
-          "value_pct_gdp": 28.1
+          "value_pct_gdp": 27.9
         },
         {
           "time": "2023-Q3",
-          "value_pct_gdp": 25.5
+          "value_pct_gdp": 25.1
         },
         {
           "time": "2023-Q4",
-          "value_pct_gdp": 25.0
+          "value_pct_gdp": 24.7
         },
         {
           "time": "2024-Q1",
-          "value_pct_gdp": 26.4
+          "value_pct_gdp": 25.9
         },
         {
           "time": "2024-Q2",
-          "value_pct_gdp": 26.1
+          "value_pct_gdp": 25.7
         },
         {
           "time": "2024-Q3",
-          "value_pct_gdp": 25.8
+          "value_pct_gdp": 25.6
         },
         {
           "time": "2024-Q4",
@@ -1103,6 +1099,10 @@
         {
           "time": "2025-Q1",
           "value_pct_gdp": 26.1
+        },
+        {
+          "time": "2025-Q2",
+          "value_pct_gdp": 25.1
         }
       ]
     },
@@ -1112,12 +1112,8 @@
       "unit": "% of GDP",
       "series": [
         {
-          "time": "2022-Q2",
-          "value_pct_gdp": 44.4
-        },
-        {
           "time": "2022-Q3",
-          "value_pct_gdp": 42.9
+          "value_pct_gdp": 43.0
         },
         {
           "time": "2022-Q4",
@@ -1125,39 +1121,43 @@
         },
         {
           "time": "2023-Q1",
-          "value_pct_gdp": 46.5
+          "value_pct_gdp": 46.0
         },
         {
           "time": "2023-Q2",
-          "value_pct_gdp": 42.2
+          "value_pct_gdp": 41.7
         },
         {
           "time": "2023-Q3",
-          "value_pct_gdp": 44.0
+          "value_pct_gdp": 43.3
         },
         {
           "time": "2023-Q4",
-          "value_pct_gdp": 44.6
+          "value_pct_gdp": 44.4
         },
         {
           "time": "2024-Q1",
-          "value_pct_gdp": 45.8
+          "value_pct_gdp": 46.0
         },
         {
           "time": "2024-Q2",
-          "value_pct_gdp": 45.9
+          "value_pct_gdp": 46.0
         },
         {
           "time": "2024-Q3",
-          "value_pct_gdp": 47.2
+          "value_pct_gdp": 47.4
         },
         {
           "time": "2024-Q4",
-          "value_pct_gdp": 46.8
+          "value_pct_gdp": 46.6
         },
         {
           "time": "2025-Q1",
-          "value_pct_gdp": 45.6
+          "value_pct_gdp": 45.3
+        },
+        {
+          "time": "2025-Q2",
+          "value_pct_gdp": 48.0
         }
       ]
     },
@@ -1167,52 +1167,52 @@
       "unit": "% of GDP",
       "series": [
         {
-          "time": "2022-Q2",
-          "value_pct_gdp": 49.4
-        },
-        {
           "time": "2022-Q3",
-          "value_pct_gdp": 49.1
+          "value_pct_gdp": 49.6
         },
         {
           "time": "2022-Q4",
-          "value_pct_gdp": 49.5
+          "value_pct_gdp": 50.3
         },
         {
           "time": "2023-Q1",
-          "value_pct_gdp": 49.3
+          "value_pct_gdp": 49.8
         },
         {
           "time": "2023-Q2",
-          "value_pct_gdp": 47.5
-        },
-        {
-          "time": "2023-Q3",
-          "value_pct_gdp": 47.2
-        },
-        {
-          "time": "2023-Q4",
-          "value_pct_gdp": 47.8
-        },
-        {
-          "time": "2024-Q1",
-          "value_pct_gdp": 47.5
-        },
-        {
-          "time": "2024-Q2",
-          "value_pct_gdp": 46.6
-        },
-        {
-          "time": "2024-Q3",
-          "value_pct_gdp": 45.9
-        },
-        {
-          "time": "2024-Q4",
           "value_pct_gdp": 47.4
         },
         {
+          "time": "2023-Q3",
+          "value_pct_gdp": 46.7
+        },
+        {
+          "time": "2023-Q4",
+          "value_pct_gdp": 47.0
+        },
+        {
+          "time": "2024-Q1",
+          "value_pct_gdp": 46.6
+        },
+        {
+          "time": "2024-Q2",
+          "value_pct_gdp": 45.7
+        },
+        {
+          "time": "2024-Q3",
+          "value_pct_gdp": 44.9
+        },
+        {
+          "time": "2024-Q4",
+          "value_pct_gdp": 46.2
+        },
+        {
           "time": "2025-Q1",
-          "value_pct_gdp": 48.1
+          "value_pct_gdp": 46.7
+        },
+        {
+          "time": "2025-Q2",
+          "value_pct_gdp": 46.9
         }
       ]
     },
@@ -1221,10 +1221,6 @@
       "country": "Netherlands",
       "unit": "% of GDP",
       "series": [
-        {
-          "time": "2022-Q2",
-          "value_pct_gdp": 48.6
-        },
         {
           "time": "2022-Q3",
           "value_pct_gdp": 46.7
@@ -1268,6 +1264,10 @@
         {
           "time": "2025-Q1",
           "value_pct_gdp": 43.2
+        },
+        {
+          "time": "2025-Q2",
+          "value_pct_gdp": 42.7
         }
       ]
     },
@@ -1276,10 +1276,6 @@
       "country": "Norway",
       "unit": "% of GDP",
       "series": [
-        {
-          "time": "2022-Q2",
-          "value_pct_gdp": 34.0
-        },
         {
           "time": "2022-Q3",
           "value_pct_gdp": 33.9
@@ -1322,7 +1318,11 @@
         },
         {
           "time": "2025-Q1",
-          "value_pct_gdp": 45.2
+          "value_pct_gdp": 45.1
+        },
+        {
+          "time": "2025-Q2",
+          "value_pct_gdp": 43.2
         }
       ]
     },
@@ -1331,10 +1331,6 @@
       "country": "Poland",
       "unit": "% of GDP",
       "series": [
-        {
-          "time": "2022-Q2",
-          "value_pct_gdp": 50.9
-        },
         {
           "time": "2022-Q3",
           "value_pct_gdp": 49.8
@@ -1365,19 +1361,23 @@
         },
         {
           "time": "2024-Q2",
-          "value_pct_gdp": 52.1
+          "value_pct_gdp": 52.0
         },
         {
           "time": "2024-Q3",
-          "value_pct_gdp": 53.3
+          "value_pct_gdp": 53.2
         },
         {
           "time": "2024-Q4",
-          "value_pct_gdp": 55.3
+          "value_pct_gdp": 55.1
         },
         {
           "time": "2025-Q1",
-          "value_pct_gdp": 57.4
+          "value_pct_gdp": 57.3
+        },
+        {
+          "time": "2025-Q2",
+          "value_pct_gdp": 58.1
         }
       ]
     },
@@ -1387,12 +1387,8 @@
       "unit": "% of GDP",
       "series": [
         {
-          "time": "2022-Q2",
-          "value_pct_gdp": 121.2
-        },
-        {
           "time": "2022-Q3",
-          "value_pct_gdp": 117.4
+          "value_pct_gdp": 117.7
         },
         {
           "time": "2022-Q4",
@@ -1400,39 +1396,43 @@
         },
         {
           "time": "2023-Q1",
-          "value_pct_gdp": 111.1
+          "value_pct_gdp": 110.8
         },
         {
           "time": "2023-Q2",
-          "value_pct_gdp": 108.7
+          "value_pct_gdp": 108.2
         },
         {
           "time": "2023-Q3",
-          "value_pct_gdp": 106.2
+          "value_pct_gdp": 105.4
         },
         {
           "time": "2023-Q4",
-          "value_pct_gdp": 97.7
+          "value_pct_gdp": 96.9
         },
         {
           "time": "2024-Q1",
-          "value_pct_gdp": 99.1
+          "value_pct_gdp": 98.1
         },
         {
           "time": "2024-Q2",
-          "value_pct_gdp": 100.3
+          "value_pct_gdp": 99.1
         },
         {
           "time": "2024-Q3",
-          "value_pct_gdp": 97.1
+          "value_pct_gdp": 95.9
         },
         {
           "time": "2024-Q4",
-          "value_pct_gdp": 94.9
+          "value_pct_gdp": 93.6
         },
         {
           "time": "2025-Q1",
-          "value_pct_gdp": 96.4
+          "value_pct_gdp": 95.0
+        },
+        {
+          "time": "2025-Q2",
+          "value_pct_gdp": 96.8
         }
       ]
     },
@@ -1442,44 +1442,40 @@
       "unit": "% of GDP",
       "series": [
         {
-          "time": "2022-Q2",
-          "value_pct_gdp": 48.4
-        },
-        {
           "time": "2022-Q3",
-          "value_pct_gdp": 48.4
+          "value_pct_gdp": 48.6
         },
         {
           "time": "2022-Q4",
-          "value_pct_gdp": 47.9
+          "value_pct_gdp": 48.1
         },
         {
           "time": "2023-Q1",
-          "value_pct_gdp": 49.7
+          "value_pct_gdp": 50.0
         },
         {
           "time": "2023-Q2",
-          "value_pct_gdp": 48.8
+          "value_pct_gdp": 49.1
         },
         {
           "time": "2023-Q3",
-          "value_pct_gdp": 49.5
+          "value_pct_gdp": 49.9
         },
         {
           "time": "2023-Q4",
-          "value_pct_gdp": 48.9
+          "value_pct_gdp": 49.3
         },
         {
           "time": "2024-Q1",
-          "value_pct_gdp": 51.7
+          "value_pct_gdp": 52.1
         },
         {
           "time": "2024-Q2",
-          "value_pct_gdp": 51.2
+          "value_pct_gdp": 51.5
         },
         {
           "time": "2024-Q3",
-          "value_pct_gdp": 53.2
+          "value_pct_gdp": 53.3
         },
         {
           "time": "2024-Q4",
@@ -1487,7 +1483,11 @@
         },
         {
           "time": "2025-Q1",
-          "value_pct_gdp": 55.8
+          "value_pct_gdp": 55.9
+        },
+        {
+          "time": "2025-Q2",
+          "value_pct_gdp": 57.3
         }
       ]
     },
@@ -1497,20 +1497,16 @@
       "unit": "% of GDP",
       "series": [
         {
-          "time": "2022-Q2",
-          "value_pct_gdp": 34.6
-        },
-        {
           "time": "2022-Q3",
-          "value_pct_gdp": 35.0
+          "value_pct_gdp": 34.9
         },
         {
           "time": "2022-Q4",
-          "value_pct_gdp": 34.2
+          "value_pct_gdp": 34.1
         },
         {
           "time": "2023-Q1",
-          "value_pct_gdp": 33.0
+          "value_pct_gdp": 32.9
         },
         {
           "time": "2023-Q2",
@@ -1518,11 +1514,11 @@
         },
         {
           "time": "2023-Q3",
-          "value_pct_gdp": 30.9
+          "value_pct_gdp": 30.8
         },
         {
           "time": "2023-Q4",
-          "value_pct_gdp": 32.1
+          "value_pct_gdp": 32.0
         },
         {
           "time": "2024-Q1",
@@ -1538,11 +1534,15 @@
         },
         {
           "time": "2024-Q4",
-          "value_pct_gdp": 33.9
+          "value_pct_gdp": 34.0
         },
         {
           "time": "2025-Q1",
-          "value_pct_gdp": 33.5
+          "value_pct_gdp": 33.7
+        },
+        {
+          "time": "2025-Q2",
+          "value_pct_gdp": 34.0
         }
       ]
     },
@@ -1552,24 +1552,20 @@
       "unit": "% of GDP",
       "series": [
         {
-          "time": "2022-Q2",
-          "value_pct_gdp": 75.6
-        },
-        {
           "time": "2022-Q3",
-          "value_pct_gdp": 75.0
+          "value_pct_gdp": 75.1
         },
         {
           "time": "2022-Q4",
-          "value_pct_gdp": 72.7
+          "value_pct_gdp": 72.8
         },
         {
           "time": "2023-Q1",
-          "value_pct_gdp": 71.9
+          "value_pct_gdp": 72.0
         },
         {
           "time": "2023-Q2",
-          "value_pct_gdp": 70.0
+          "value_pct_gdp": 70.1
         },
         {
           "time": "2023-Q3",
@@ -1577,27 +1573,31 @@
         },
         {
           "time": "2023-Q4",
-          "value_pct_gdp": 68.4
+          "value_pct_gdp": 68.3
         },
         {
           "time": "2024-Q1",
-          "value_pct_gdp": 70.0
+          "value_pct_gdp": 69.8
         },
         {
           "time": "2024-Q2",
-          "value_pct_gdp": 69.4
+          "value_pct_gdp": 69.0
         },
         {
           "time": "2024-Q3",
-          "value_pct_gdp": 66.7
+          "value_pct_gdp": 66.3
         },
         {
           "time": "2024-Q4",
-          "value_pct_gdp": 67.0
+          "value_pct_gdp": 66.6
         },
         {
           "time": "2025-Q1",
-          "value_pct_gdp": 69.9
+          "value_pct_gdp": 69.5
+        },
+        {
+          "time": "2025-Q2",
+          "value_pct_gdp": 69.4
         }
       ]
     },
@@ -1607,16 +1607,12 @@
       "unit": "% of GDP",
       "series": [
         {
-          "time": "2022-Q2",
-          "value_pct_gdp": 58.7
-        },
-        {
           "time": "2022-Q3",
           "value_pct_gdp": 57.3
         },
         {
           "time": "2022-Q4",
-          "value_pct_gdp": 57.7
+          "value_pct_gdp": 57.8
         },
         {
           "time": "2023-Q1",
@@ -1624,35 +1620,39 @@
         },
         {
           "time": "2023-Q2",
-          "value_pct_gdp": 59.2
-        },
-        {
-          "time": "2023-Q3",
-          "value_pct_gdp": 58.0
-        },
-        {
-          "time": "2023-Q4",
-          "value_pct_gdp": 55.6
-        },
-        {
-          "time": "2024-Q1",
-          "value_pct_gdp": 60.2
-        },
-        {
-          "time": "2024-Q2",
-          "value_pct_gdp": 60.0
-        },
-        {
-          "time": "2024-Q3",
-          "value_pct_gdp": 59.8
-        },
-        {
-          "time": "2024-Q4",
           "value_pct_gdp": 59.3
         },
         {
+          "time": "2023-Q3",
+          "value_pct_gdp": 58.1
+        },
+        {
+          "time": "2023-Q4",
+          "value_pct_gdp": 55.8
+        },
+        {
+          "time": "2024-Q1",
+          "value_pct_gdp": 60.3
+        },
+        {
+          "time": "2024-Q2",
+          "value_pct_gdp": 60.2
+        },
+        {
+          "time": "2024-Q3",
+          "value_pct_gdp": 60.1
+        },
+        {
+          "time": "2024-Q4",
+          "value_pct_gdp": 59.7
+        },
+        {
           "time": "2025-Q1",
-          "value_pct_gdp": 62.8
+          "value_pct_gdp": 63.2
+        },
+        {
+          "time": "2025-Q2",
+          "value_pct_gdp": 62.9
         }
       ]
     }

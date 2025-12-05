@@ -42,29 +42,62 @@ function toNum(v){
   const n = Number(s);
   return Number.isFinite(n) ? n : NaN;
 }
-// Tijd: YYYY-Qn, Qn-YYYY, YYYY-MM, YYYYMn, YYYYMM, YYYY
+
+// ======================================================
+// ✅ FIXED parseTime() — correcte jaar/kwartaal parsing
+// ======================================================
 function parseTime(v){
-  if (v==null) return null;
+  if (v == null) return null;
   const s = String(v).trim();
   let m;
-  m = s.match(/^(\d{4})-?Q([1-4])$/) || s.match(/^Q([1-4])-(\d{4})$/);
-  if (m){ const year = m[2]?m[2]:m[1]; const q = m[2]?m[1]:m[2]; const month = (Number(q)-1)*3 + 1; return new Date(`${year}-${String(month).padStart(2,'0')}-01T00:00:00Z`); }
-  m = s.match(/^(\d{4})-(\d{1,2})$/); if (m) return new Date(`${m[1]}-${String(m[2]).padStart(2,'0')}-01T00:00:00Z`);
-  m = s.match(/^(\d{4})M(\d{1,2})$/); if (m) return new Date(`${m[1]}-${String(m[2]).padStart(2,'0')}-01T00:00:00Z`);
-  m = s.match(/^(\d{4})(\d{2})$/);    if (m) return new Date(`${m[1]}-${m[2]}-01T00:00:00Z`);
-  m = s.match(/^(\d{4})$/);           if (m) return new Date(`${m[1]}-01-01T00:00:00Z`);
+
+  // YYYY-Qn or YYYYQn
+  m = s.match(/^(\d{4})-?Q([1-4])$/);
+  if (m) {
+    const year = m[1];
+    const q = m[2];
+    const month = (Number(q) - 1) * 3 + 1;
+    return new Date(`${year}-${String(month).padStart(2,'0')}-01T00:00:00Z`);
+  }
+
+  // Qn-YYYY
+  m = s.match(/^Q([1-4])-(\d{4})$/);
+  if (m) {
+    const q = m[1];
+    const year = m[2];
+    const month = (Number(q) - 1) * 3 + 1;
+    return new Date(`${year}-${String(month).padStart(2,'0')}-01T00:00:00Z`);
+  }
+
+  // YYYY-MM
+  m = s.match(/^(\d{4})-(\d{1,2})$/);
+  if (m) return new Date(`${m[1]}-${String(m[2]).padStart(2,'0')}-01T00:00:00Z`);
+
+  // YYYYMn
+  m = s.match(/^(\d{4})M(\d{1,2})$/);
+  if (m) return new Date(`${m[1]}-${String(m[2]).padStart(2,'0')}-01T00:00:00Z`);
+
+  // YYYYMM
+  m = s.match(/^(\d{4})(\d{2})$/);
+  if (m) return new Date(`${m[1]}-${m[2]}-01T00:00:00Z`);
+
+  // YYYY
+  m = s.match(/^(\d{4})$/);
+  if (m) return new Date(`${m[1]}-01-01T00:00:00Z`);
+
   const d = new Date(s);
   return isNaN(d) ? null : d;
 }
+// ======================================================
+// Einde Bugfix
+// ======================================================
+
 function inferTimeUnit(points){
-  // Als alle punten op januari staan, ga uit van jaardata
-  return points.length && points.every(p => p.x instanceof Date && p.x.getUTCMonth() === 0) ? 'year' : 'month';
+  return points.length && points.every(p => p.x instanceof Date && p.x.getUTCMonth() === 0)
+    ? 'year' : 'month';
 }
 
 // ==== JSON → rows (flatten) ====
-// A) {records:[{time, value_*, country*}, ...]}          (cross-section)
-// B) {records:[{country*, series:[{time, value_*},..]}]} (timeseries per land)
-// C) arrays of {data|rows|items|result: [...]}
 function objectJsonToRows(obj){
   if (!obj) return null;
 
@@ -93,7 +126,9 @@ function objectJsonToRows(obj){
             else if (pt.OBS_VALUE !== undefined) row.value = pt.OBS_VALUE;
             else if (pt.value !== undefined) row.value = pt.value;
             else {
-              const numKey = Object.keys(row).find(k => k !== 'time' && Number.isFinite(toNum(row[k])));
+              const numKey = Object.keys(row).find(k =>
+                k !== 'time' && Number.isFinite(toNum(row[k]))
+              );
               if (numKey) row.value = row[numKey];
             }
           }
@@ -116,6 +151,7 @@ function objectJsonToRows(obj){
 
   return null;
 }
+
 function tryParse(jsonOrCsv){
   try{
     const obj = JSON.parse(jsonOrCsv);
@@ -164,15 +200,12 @@ function prettyMetricName(key){
 }
 
 // ==== Build datasets ====
-// Multilijn: groepeer per geo en maak per geo een dataset
 function buildMultiSeries(rows, timeKey, valueKey, countryKey, selectedGeos){
-  // Filter op selectie (indien opgegeven)
   let useRows = rows;
   if (countryKey && selectedGeos && selectedGeos.length){
     const set = new Set(selectedGeos.map(String));
     useRows = rows.filter(r => set.has(String(r[countryKey])));
   }
-  // Groepeer
   const byGeo = new Map();
   for (const r of useRows){
     const geo = countryKey ? String(r[countryKey]) : 'ALL';
@@ -181,7 +214,6 @@ function buildMultiSeries(rows, timeKey, valueKey, countryKey, selectedGeos){
     const y = toNum(r[valueKey]);
     if (x instanceof Date && !isNaN(x) && Number.isFinite(y)) byGeo.get(geo).push({x,y});
   }
-  // Sorteren en omzetten naar Chart.js-datasets
   const datasets = [];
   for (const [geo, pts] of byGeo.entries()){
     if (!pts.length) continue;
@@ -190,6 +222,7 @@ function buildMultiSeries(rows, timeKey, valueKey, countryKey, selectedGeos){
   }
   return datasets;
 }
+
 function buildBarRows(rows, countryKey, valueKey){
   return rows.map(r => ({ label: labelForRow(r), y: toNum(r[valueKey]) }))
     .filter(p => Number.isFinite(p.y) && p.label)
@@ -207,6 +240,7 @@ async function ensureTimeAdapter(){
   });
   window._chartTimeLoaded = true;
 }
+
 function renderLineMulti(datasets, timeUnit, valueKey){
   const ctx = document.getElementById('chart');
   const data = { datasets };
@@ -218,6 +252,7 @@ function renderLineMulti(datasets, timeUnit, valueKey){
   if (CHART) CHART.destroy();
   CHART = new Chart(ctx, { type:'line', data, options });
 }
+
 function renderBar(items, valueKey, periodText){
   const ctx = document.getElementById('chart');
   const data = { labels: items.map(i=>i.label), datasets: [{ label: prettyMetricName(valueKey), data: items.map(i=>i.y) }] };
@@ -232,7 +267,6 @@ function renderBar(items, valueKey, periodText){
 
 // ==== Tables ====
 function renderTableFromDatasets(datasets){
-  // toon de laatste waarde per geo
   let rows = [];
   for (const ds of datasets){
     if (!ds.data.length) continue;
@@ -246,6 +280,7 @@ function renderTableFromDatasets(datasets){
   html += '</tbody></table>';
   tableWrap.innerHTML = html;
 }
+
 function renderTableFromBars(items){
   let html = '<table><thead><tr><th>land</th><th>waarde</th></tr></thead><tbody>';
   html += items.map(i=> `<tr><td>${i.label}</td><td>${i.y}</td></tr>`).join('');
@@ -268,17 +303,19 @@ async function load(url){
     // Serie-keuze
     const preferred = ['value_pct_gdp','value','OBS_VALUE'];
     let defaultKey = numericKeys.find(k => preferred.includes(k)) || numericKeys[0];
-    seriesKeySelect.innerHTML = numericKeys.map(k => `<option value="${k}" ${k===defaultKey?'selected':''}>${k}</option>`).join('');
+    seriesKeySelect.innerHTML = numericKeys
+      .map(k => `<option value="${k}" ${k===defaultKey?'selected':''}>${k}</option>`)
+      .join('');
     const valueKey = seriesKeySelect.value || defaultKey;
 
-    // Geo-keuze (multiselect) – vul en behoud vorige selectie zoveel mogelijk
+    // Geo-keuze
     const prevSelection = new Set([...geoSelect.selectedOptions].map(o=>o.value));
     geoSelect.innerHTML = geos.map(g => `<option value="${g}" ${prevSelection.has(g)?'selected':''}>${g}</option>`).join('');
 
     const { times, singlePeriod, period } = summarizeShape(rows, timeKey);
 
+    // ==== BAR ====
     if (singlePeriod && countryKey){
-      // BAR: één periode (ranglijst)
       const bars = buildBarRows(rows, countryKey, valueKey);
       if (!bars.length) throw new Error('Geen waarden om te tonen (bar).');
       renderBar(bars, valueKey, period);
@@ -288,13 +325,13 @@ async function load(url){
       return;
     }
 
-    // LINE: meerdere periodes – multilijn
+    // ==== LINE ====
     await ensureTimeAdapter();
 
     const selectedGeos = [...geoSelect.selectedOptions].map(o=>o.value);
     let datasets = buildMultiSeries(rows, timeKey, valueKey, countryKey, selectedGeos);
 
-    // Fallback: als géén selectie of geen punten → kies automatisch een paar prominente geo’s
+    // fallback auto-select
     if (!datasets.length){
       const prio = ['EU27_2020','EA20','EA19'];
       const auto = geos.length ? (prio.filter(p=>geos.includes(p)).concat(geos)).slice(0,5) : [];
@@ -308,6 +345,7 @@ async function load(url){
     const unit = inferTimeUnit(allPoints);
     renderLineMulti(datasets, unit, valueKey);
     renderTableFromDatasets(datasets);
+
     meta.innerHTML = `Bron: <code>${url}</code> · Records: <b>${rows.length}</b> · Kolom: <code>${valueKey}</code> · Reeksen: <b>${datasets.length}</b>`;
     setMessage('');
   }catch(err){

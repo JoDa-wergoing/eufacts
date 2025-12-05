@@ -244,64 +244,70 @@ async function ensureTimeAdapter(){
 function renderLineMulti(datasets, timeUnit, valueKey){
   const ctx = document.getElementById('chart');
 
-  // Check of we echt Date-objecten hebben
-  const hasDates = datasets.some(ds =>
-    Array.isArray(ds.data) &&
-    ds.data.some(p => p.x instanceof Date && !isNaN(p.x))
-  );
-
-  let config;
-
-  if (hasDates) {
-    // ✅ Normale tijd-as (met date-fns adapter)
-    const data = { datasets };
-    const options = {
-      responsive: true,
-      parsing: false,
-      scales: {
-        x: { type: 'time', time: { unit: timeUnit } },
-        y: { ...Y_BASELINE }
-      },
-      plugins: {
-        legend: { display: true },
-        title: { display: true, text: prettyMetricName(valueKey) }
-      }
-    };
-    config = { type: 'line', data, options };
-  } else {
-    // ⚠️ Fallback: geen geldige Date → gebruik index als categorie-as
-    console.warn('Geen geldige Date-x waarden gevonden, fallback naar categorie-as.');
-
-    const maxLen = Math.max(...datasets.map(ds => ds.data.length));
-    const labels = Array.from({ length: maxLen }, (_, i) => String(i + 1));
-
-    const catDatasets = datasets.map(ds => ({
-      label: ds.label,
-      data: ds.data.map(p => p.y)
-    }));
-
-    const data = { labels, datasets: catDatasets };
-    const options = {
-      responsive: true,
-      scales: {
-        x: { ticks: { autoSkip: false, maxRotation: 0 }},
-        y: { ...Y_BASELINE }
-      },
-      plugins: {
-        legend: { display: true },
-        title: { display: true, text: prettyMetricName(valueKey) + ' (index-as)' }
-      }
-    };
-    config = { type: 'line', data, options };
+  if (!datasets || !datasets.length) {
+    console.warn('renderLineMulti: geen datasets');
+    return;
   }
-  console.log(datasets)
-  console.log(datasets[0])
-  console.log(datasets[0].data)
 
+  // Gebruik de eerste dataset als basis voor de X-as
+  const first = datasets[0];
+  if (!first.data || !first.data.length) {
+    console.warn('renderLineMulti: eerste dataset heeft geen data');
+    return;
+  }
+
+  // Maak nette labels van de Date → "YYYY-Qn"
+  const labels = first.data.map(pt => {
+    const d = pt.x;
+    if (!(d instanceof Date) || isNaN(d)) return '';
+    const year = d.getUTCFullYear();
+    const month = d.getUTCMonth(); // 0=jan, 3=apr, 6=jul, 9=okt
+    const quarter = Math.floor(month / 3) + 1;
+    return `${year}-Q${quarter}`;
+  });
+
+  // Zet data om naar simpele number-arrays per land
+  const simpleDatasets = datasets.map(ds => ({
+    label: ds.label,
+    data: ds.data.map(pt => pt.y),
+    tension: ds.tension ?? 0.2,
+    // Eventueel kun je hier borderColor/backgroundColor zetten,
+    // maar Chart.js geeft zelf al prima default kleuren.
+  }));
+
+  const data = {
+    labels,
+    datasets: simpleDatasets
+  };
+
+  const options = {
+    responsive: true,
+    scales: {
+      x: {
+        type: 'category',
+        ticks: {
+          autoSkip: false,
+          maxRotation: 0,
+          minRotation: 0
+        }
+      },
+      y: {
+        ...Y_BASELINE   // beginAtZero: true, suggestedMin: 0
+      }
+    },
+    plugins: {
+      legend: { display: true },
+      title: {
+        display: true,
+        text: prettyMetricName(valueKey)
+      }
+    }
+  };
 
   if (CHART) CHART.destroy();
-  CHART = new Chart(ctx, config);
+  CHART = new Chart(ctx, { type: 'line', data, options });
 }
+
 
 
 function renderBar(items, valueKey, periodText){

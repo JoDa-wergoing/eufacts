@@ -2,7 +2,7 @@
   "dataset": "GOV_10A_TAXAG",
   "description": "Total receipts from taxes and social contributions (% of GDP, general government, annual) (latest period)",
   "source_url": "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/gov_10a_taxag?lastTimePeriod=10",
-  "updated_at": "2025-12-05T08:05:26.770973+00:00",
+  "updated_at": "2025-12-05T11:08:20.182318+00:00",
   "latest_period": "2024",
   "unit": "% of GDP",
   "records": [

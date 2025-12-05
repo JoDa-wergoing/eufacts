@@ -243,15 +243,62 @@ async function ensureTimeAdapter(){
 
 function renderLineMulti(datasets, timeUnit, valueKey){
   const ctx = document.getElementById('chart');
-  const data = { datasets };
-  const options = {
-    responsive: true, parsing: false,
-    scales: { x: { type:'time', time:{ unit: timeUnit } }, y: { ...Y_BASELINE } },
-    plugins: { legend:{ display:true }, title:{ display:true, text: prettyMetricName(valueKey) } }
-  };
+
+  // Check of we echt Date-objecten hebben
+  const hasDates = datasets.some(ds =>
+    Array.isArray(ds.data) &&
+    ds.data.some(p => p.x instanceof Date && !isNaN(p.x))
+  );
+
+  let config;
+
+  if (hasDates) {
+    // ✅ Normale tijd-as (met date-fns adapter)
+    const data = { datasets };
+    const options = {
+      responsive: true,
+      parsing: false,
+      scales: {
+        x: { type: 'time', time: { unit: timeUnit } },
+        y: { ...Y_BASELINE }
+      },
+      plugins: {
+        legend: { display: true },
+        title: { display: true, text: prettyMetricName(valueKey) }
+      }
+    };
+    config = { type: 'line', data, options };
+  } else {
+    // ⚠️ Fallback: geen geldige Date → gebruik index als categorie-as
+    console.warn('Geen geldige Date-x waarden gevonden, fallback naar categorie-as.');
+
+    const maxLen = Math.max(...datasets.map(ds => ds.data.length));
+    const labels = Array.from({ length: maxLen }, (_, i) => String(i + 1));
+
+    const catDatasets = datasets.map(ds => ({
+      label: ds.label,
+      data: ds.data.map(p => p.y)
+    }));
+
+    const data = { labels, datasets: catDatasets };
+    const options = {
+      responsive: true,
+      scales: {
+        x: { ticks: { autoSkip: false, maxRotation: 0 }},
+        y: { ...Y_BASELINE }
+      },
+      plugins: {
+        legend: { display: true },
+        title: { display: true, text: prettyMetricName(valueKey) + ' (index-as)' }
+      }
+    };
+    config = { type: 'line', data, options };
+  }
+
   if (CHART) CHART.destroy();
-  CHART = new Chart(ctx, { type:'line', data, options });
+  CHART = new Chart(ctx, config);
 }
+
 
 function renderBar(items, valueKey, periodText){
   const ctx = document.getElementById('chart');

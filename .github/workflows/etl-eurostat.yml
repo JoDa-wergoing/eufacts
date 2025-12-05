@@ -35,7 +35,7 @@ jobs:
 
       - name: Run Eurostat ETL (multi)
         run: |
-          python etl/eurostat_multi.py
+          python etl/eurostat.py
 
       - name: Configure git
         run: |

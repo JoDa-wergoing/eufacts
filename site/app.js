@@ -2,6 +2,20 @@
 const DEFAULT_DATA = new URLSearchParams(location.search).get('data') || './data/latest/teina230-timeseries.json';
 const Y_BASELINE = { beginAtZero: true, suggestedMin: 0 };
 
+// ==== Dataset registry ====
+// Hier kun je makkelijk nieuwe datasets toevoegen.
+const DATASETS = {
+  teina230: {
+    latest: './data/latest/teina230.json',
+    timeseries: './data/latest/teina230-timeseries.json'
+  },
+  // Voorbeeld voor later:
+  // gov_deficit: {
+  //   latest: './data/latest/gov_deficit.json',
+  //   timeseries: './data/latest/gov_deficit-timeseries.json'
+  // }
+};
+
 // ==== Elements ====
 const el = (id) => document.getElementById(id);
 const dataUrlInput = el('dataUrl');
@@ -10,7 +24,32 @@ const seriesKeySelect = el('seriesKey');
 const msg = el('msg');
 const meta = el('meta');
 const tableWrap = el('tableWrap');
+const datasetSelect = el('datasetSelect');
 let CHART;
+
+// ==== View helpers ====
+function getSelectedViewMode() {
+  const r = document.querySelector('input[name="viewMode"]:checked');
+  return r ? r.value : 'latest';
+}
+function getCurrentDatasetId() {
+  return datasetSelect?.value || 'teina230';
+}
+function getUrlForCurrentSelection() {
+  const dsId = getCurrentDatasetId();
+  const view = getSelectedViewMode();
+  const ds = DATASETS[dsId];
+
+  if (!ds) {
+    console.warn('Onbekende dataset:', dsId, 'val terug op DEFAULT_DATA');
+    return DEFAULT_DATA;
+  }
+  if (!ds[view]) {
+    console.warn(`View "${view}" niet gevonden voor dataset ${dsId}, val terug op "latest"`);
+    return ds.latest || DEFAULT_DATA;
+  }
+  return ds[view];
+}
 
 // ==== Utils ====
 function setMessage(text, kind='info'){
@@ -22,7 +61,6 @@ async function fetchText(url){
   if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
   return await res.text();
 }
-// CSV → objects
 function parseCSV(text){
   const lines = text.trim().split(/\r?\n/);
   if (!lines.length) return [];
@@ -43,9 +81,7 @@ function toNum(v){
   return Number.isFinite(n) ? n : NaN;
 }
 
-// ======================================================
-// ✅ FIXED parseTime() — correcte jaar/kwartaal parsing
-// ======================================================
+// Tijd: YYYY-Qn, Qn-YYYY, YYYY-MM, YYYYMn, YYYYMM, YYYY
 function parseTime(v){
   if (v == null) return null;
   const s = String(v).trim();
@@ -88,16 +124,14 @@ function parseTime(v){
   const d = new Date(s);
   return isNaN(d) ? null : d;
 }
-// ======================================================
-// Einde Bugfix
-// ======================================================
 
 function inferTimeUnit(points){
+  // Wordt nu alleen nog info; x-as is categorie.
   return points.length && points.every(p => p.x instanceof Date && p.x.getUTCMonth() === 0)
     ? 'year' : 'month';
 }
 
-// ==== JSON → rows (flatten) ====
+// ==== JSON → rows ====
 function objectJsonToRows(obj){
   if (!obj) return null;
 
@@ -195,7 +229,11 @@ function labelForRow(r){
   return r.country ?? r.country_name ?? r.name ?? r.geo_label ?? r.country_code ?? r.geo ?? '?';
 }
 function prettyMetricName(key){
-  const map = { value_pct_gdp: 'General government gross debt (% of GDP)', value: 'Value', OBS_VALUE: 'Observed value' };
+  const map = {
+    value_pct_gdp: 'General government gross debt (% of GDP)',
+    value: 'Value',
+    OBS_VALUE: 'Observed value'
+  };
   return map[key] || String(key).replace(/_/g,' ').replace(/\b\w/g, c=>c.toUpperCase());
 }
 
@@ -218,7 +256,11 @@ function buildMultiSeries(rows, timeKey, valueKey, countryKey, selectedGeos){
   for (const [geo, pts] of byGeo.entries()){
     if (!pts.length) continue;
     pts.sort((a,b)=> a.x - b.x);
-    datasets.push({ label: geo, data: pts.map(p=>({x:p.x, y:p.y})), tension: .2 });
+    datasets.push({
+      label: geo,
+      data: pts.map(p=>({x:p.x, y:p.y})),
+      tension: .2
+    });
   }
   return datasets;
 }
@@ -230,17 +272,7 @@ function buildBarRows(rows, countryKey, valueKey){
 }
 
 // ==== Charts ====
-async function ensureTimeAdapter(){
-  if (window._chartTimeLoaded) return;
-  await new Promise((resolve)=>{
-    const s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3';
-    s.onload = resolve;
-    document.head.appendChild(s);
-  });
-  window._chartTimeLoaded = true;
-}
-
+// Lijn-grafiek met categorie-x-as, labels "YYYY-Qn".
 function renderLineMulti(datasets, timeUnit, valueKey){
   const ctx = document.getElementById('chart');
 
@@ -249,58 +281,40 @@ function renderLineMulti(datasets, timeUnit, valueKey){
     return;
   }
 
-  // Gebruik de eerste dataset als basis voor de X-as
   const first = datasets[0];
   if (!first.data || !first.data.length) {
     console.warn('renderLineMulti: eerste dataset heeft geen data');
     return;
   }
 
-  // Maak nette labels van de Date → "YYYY-Qn"
   const labels = first.data.map(pt => {
     const d = pt.x;
     if (!(d instanceof Date) || isNaN(d)) return '';
     const year = d.getUTCFullYear();
-    const month = d.getUTCMonth(); // 0=jan, 3=apr, 6=jul, 9=okt
+    const month = d.getUTCMonth();
     const quarter = Math.floor(month / 3) + 1;
     return `${year}-Q${quarter}`;
   });
 
-  // Zet data om naar simpele number-arrays per land
   const simpleDatasets = datasets.map(ds => ({
     label: ds.label,
     data: ds.data.map(pt => pt.y),
-    tension: ds.tension ?? 0.2,
-    // Eventueel kun je hier borderColor/backgroundColor zetten,
-    // maar Chart.js geeft zelf al prima default kleuren.
+    tension: ds.tension ?? 0.2
   }));
 
-  const data = {
-    labels,
-    datasets: simpleDatasets
-  };
-
+  const data = { labels, datasets: simpleDatasets };
   const options = {
     responsive: true,
     scales: {
       x: {
         type: 'category',
-        ticks: {
-          autoSkip: false,
-          maxRotation: 0,
-          minRotation: 0
-        }
+        ticks: { autoSkip: false, maxRotation: 0, minRotation: 0 }
       },
-      y: {
-        ...Y_BASELINE   // beginAtZero: true, suggestedMin: 0
-      }
+      y: { ...Y_BASELINE }
     },
     plugins: {
       legend: { display: true },
-      title: {
-        display: true,
-        text: prettyMetricName(valueKey)
-      }
+      title: { display: true, text: prettyMetricName(valueKey) }
     }
   };
 
@@ -308,15 +322,28 @@ function renderLineMulti(datasets, timeUnit, valueKey){
   CHART = new Chart(ctx, { type: 'line', data, options });
 }
 
-
-
 function renderBar(items, valueKey, periodText){
   const ctx = document.getElementById('chart');
-  const data = { labels: items.map(i=>i.label), datasets: [{ label: prettyMetricName(valueKey), data: items.map(i=>i.y) }] };
+  const data = {
+    labels: items.map(i=>i.label),
+    datasets: [{
+      label: prettyMetricName(valueKey),
+      data: items.map(i=>i.y)
+    }]
+  };
   const options = {
     responsive: true,
-    scales: { x:{ ticks:{ autoSkip:false, maxRotation:60, minRotation:0 } }, y:{ ...Y_BASELINE } },
-    plugins: { legend:{ display:false }, title:{ display:true, text: `${prettyMetricName(valueKey)} — ${periodText||''}`.trim() } }
+    scales: {
+      x:{ ticks:{ autoSkip:false, maxRotation:60, minRotation:0 } },
+      y:{ ...Y_BASELINE }
+    },
+    plugins: {
+      legend:{ display:false },
+      title:{
+        display:true,
+        text: `${prettyMetricName(valueKey)} — ${periodText||''}`.trim()
+      }
+    }
   };
   if (CHART) CHART.destroy();
   CHART = new Chart(ctx, { type:'bar', data, options });
@@ -328,7 +355,9 @@ function renderTableFromDatasets(datasets){
   for (const ds of datasets){
     if (!ds.data.length) continue;
     const last = ds.data[ds.data.length-1];
-    const ym = new Intl.DateTimeFormat('en-CA',{year:'numeric',month:'2-digit',day:'2-digit'}).format(last.x).slice(0,7);
+    const ym = new Intl.DateTimeFormat('en-CA',{
+      year:'numeric',month:'2-digit',day:'2-digit'
+    }).format(last.x).slice(0,7);
     rows.push({ geo: ds.label, period: ym, value: last.y });
   }
   rows.sort((a,b)=> b.value - a.value);
@@ -337,7 +366,6 @@ function renderTableFromDatasets(datasets){
   html += '</tbody></table>';
   tableWrap.innerHTML = html;
 }
-
 function renderTableFromBars(items){
   let html = '<table><thead><tr><th>land</th><th>waarde</th></tr></thead><tbody>';
   html += items.map(i=> `<tr><td>${i.label}</td><td>${i.y}</td></tr>`).join('');
@@ -365,14 +393,14 @@ async function load(url){
       .join('');
     const valueKey = seriesKeySelect.value || defaultKey;
 
-    // Geo-keuze
+    // Geo-keuze (multiselect) – behoud vorige selectie
     const prevSelection = new Set([...geoSelect.selectedOptions].map(o=>o.value));
     geoSelect.innerHTML = geos.map(g => `<option value="${g}" ${prevSelection.has(g)?'selected':''}>${g}</option>`).join('');
 
     const { times, singlePeriod, period } = summarizeShape(rows, timeKey);
 
-    // ==== BAR ====
     if (singlePeriod && countryKey){
+      // BAR: één periode (ranglijst)
       const bars = buildBarRows(rows, countryKey, valueKey);
       if (!bars.length) throw new Error('Geen waarden om te tonen (bar).');
       renderBar(bars, valueKey, period);
@@ -382,13 +410,11 @@ async function load(url){
       return;
     }
 
-    // ==== LINE ====
-    await ensureTimeAdapter();
-
+    // LINE: meerdere periodes – multilijn
     const selectedGeos = [...geoSelect.selectedOptions].map(o=>o.value);
     let datasets = buildMultiSeries(rows, timeKey, valueKey, countryKey, selectedGeos);
 
-    // fallback auto-select
+    // Fallback: automatisch een paar geo’s kiezen
     if (!datasets.length){
       const prio = ['EU27_2020','EA20','EA19'];
       const auto = geos.length ? (prio.filter(p=>geos.includes(p)).concat(geos)).slice(0,5) : [];
@@ -399,7 +425,7 @@ async function load(url){
     if (!datasets.length) throw new Error('Kon geen tijdreeks afleiden uit de data.');
 
     const allPoints = datasets.flatMap(ds => ds.data);
-    const unit = inferTimeUnit(allPoints);
+    const unit = inferTimeUnit(allPoints); // informatief
     renderLineMulti(datasets, unit, valueKey);
     renderTableFromDatasets(datasets);
 
@@ -412,10 +438,34 @@ async function load(url){
 }
 
 // ==== Wire & boot ====
-document.addEventListener('DOMContentLoaded', ()=>{
-  if (dataUrlInput) dataUrlInput.value = DEFAULT_DATA;
-  document.getElementById('loadBtn')?.addEventListener('click', ()=> load(dataUrlInput.value || DEFAULT_DATA));
-  seriesKeySelect?.addEventListener('change', ()=> document.getElementById('loadBtn').click());
-  geoSelect?.addEventListener('change', ()=> document.getElementById('loadBtn').click());
-  load(DEFAULT_DATA);
+document.addEventListener('DOMContentLoaded', () => {
+  const hasExplicitDataParam = new URLSearchParams(location.search).has('data');
+  const initialUrl = hasExplicitDataParam ? DEFAULT_DATA : getUrlForCurrentSelection();
+
+  if (dataUrlInput) dataUrlInput.value = initialUrl;
+
+  document.getElementById('loadBtn')?.addEventListener('click', () =>
+    load(dataUrlInput.value || initialUrl)
+  );
+  seriesKeySelect?.addEventListener('change', () =>
+    document.getElementById('loadBtn').click()
+  );
+  geoSelect?.addEventListener('change', () =>
+    document.getElementById('loadBtn').click()
+  );
+
+  datasetSelect?.addEventListener('change', () => {
+    const url = getUrlForCurrentSelection();
+    if (dataUrlInput) dataUrlInput.value = url;
+    load(url);
+  });
+  document.querySelectorAll('input[name="viewMode"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      const url = getUrlForCurrentSelection();
+      if (dataUrlInput) dataUrlInput.value = url;
+      load(url);
+    });
+  });
+
+  load(initialUrl);
 });

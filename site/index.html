@@ -21,7 +21,7 @@
     .card{background:var(--card); border:1px solid var(--ring); border-radius:14px; padding:14px; box-shadow:0 1px 0 rgba(15,23,42,.03)}
     label{font-size:13px; color:var(--muted); display:block; margin-bottom:6px}
     input, select{width:100%; padding:10px 12px; border:1px solid var(--ring); border-radius:10px; font-size:14px; background:#fff}
-    .row{display:flex; gap:10px; align-items:end; flex-wrap:wrap}
+    .row{display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap}
     .row > div{flex:1; min-width:230px}
     table{width:100%; border-collapse:collapse; font-size:13px}
     th,td{padding:8px 10px; border-bottom:1px solid var(--ring); text-align:left}
@@ -30,6 +30,11 @@
     .foot{color:var(--muted); font-size:12px}
     .error{color:#b91c1c; background:#fef2f2; border:1px solid #fee2e2; padding:10px; border-radius:10px}
     .hint{font-size:12px; color:var(--muted); margin-top:4px}
+
+    fieldset{border:none; margin:0; padding:0}
+    fieldset legend{font-size:13px; color:var(--muted); margin-bottom:4px}
+    .view-options label{display:block; font-size:13px; color:var(--muted); margin-bottom:4px}
+    .view-options input[type="radio"]{margin-right:6px; width:auto}
   </style>
 </head>
 <body>
@@ -46,10 +51,37 @@
 
   <main class="wrap">
     <div class="card">
+      <!-- Nieuw: dataset + view selectie -->
       <div class="row">
         <div>
+          <label for="datasetSelect">Dataset</label>
+          <select id="datasetSelect">
+            <option value="teina230">Gov. debt (% of GDP)</option>
+            <!-- hier later meer datasets -->
+          </select>
+        </div>
+        <div>
+          <fieldset>
+            <legend>View</legend>
+            <div class="view-options">
+              <label>
+                <input type="radio" name="viewMode" value="latest" checked>
+                Laatste kwartaal (ranglijst)
+              </label>
+              <label>
+                <input type="radio" name="viewMode" value="timeseries">
+                Laatste 12 kwartalen (tijdreeks)
+              </label>
+            </div>
+          </fieldset>
+        </div>
+      </div>
+
+      <!-- Bestaande controls -->
+      <div class="row" style="margin-top:10px">
+        <div>
           <label for="dataUrl">Data-bestand (JSON/CSV)</label>
-          <input id="dataUrl" placeholder="bv. ./data/latest/teina23.json" />
+          <input id="dataUrl" placeholder="bv. ./data/latest/teina230.json" />
           <div class="hint">Tip: gebruik <code>?data=...</code> in de URL om een bron te forceren.</div>
         </div>
         <div>

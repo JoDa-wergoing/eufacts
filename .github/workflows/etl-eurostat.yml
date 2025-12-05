@@ -1,0 +1,61 @@
+name: ETL • Eurostat (Eufacts)
+
+on:
+  # 🎯 Dagelijkse run om bv. 04:15 UTC (aanpassen mag)
+  schedule:
+    - cron: '15 4 * * *'
+  # 🎯 Handmatig starten vanuit de Actions-tab
+  workflow_dispatch: {}
+
+permissions:
+  contents: write   # nodig om te kunnen committen & pushen
+
+jobs:
+  etl:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # nodig voor nette git history / push
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          else
+            pip install requests
+          fi
+
+      - name: Run Eurostat ETL (multi)
+        run: |
+          python etl/eurostat_multi.py
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Commit & push data changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Kijk of er iets veranderd is
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git add data
+
+          git commit -m "ETL update: Eurostat datasets $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+
+          git push origin HEAD:main
+          # ⬆️ Als je default branch 'master' heet:
+          # git push origin HEAD:master

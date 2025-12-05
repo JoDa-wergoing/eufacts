@@ -9,6 +9,11 @@ const DATASETS = {
     latest: './data/latest/teina230.json',
     timeseries: './data/latest/teina230-timeseries.json'
   },
+    // Belastinginkomsten (% BBP) – Eurostat gov_10a_taxag
+  gov_10a_taxag: {
+    latest: './data/latest/gov_10a_taxag.json',
+    timeseries: './data/latest/gov_10a_taxag-timeseries.json'
+  }
   // Voorbeeld voor later:
   // gov_deficit: {
   //   latest: './data/latest/gov_deficit.json',

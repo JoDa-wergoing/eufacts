@@ -3,7 +3,7 @@ name: ETL • Eurostat (Eufacts)
 on:
   # 🎯 Dagelijkse run om bv. 04:15 UTC (aanpassen mag)
   schedule:
-    - cron: '15 4 * * *'
+    - cron: '04 15 * * *'
   # 🎯 Handmatig starten vanuit de Actions-tab
   workflow_dispatch: {}
 

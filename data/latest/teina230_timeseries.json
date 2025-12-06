@@ -2,7 +2,7 @@
   "dataset": "TEINA230",
   "description": "General government gross debt, % of GDP (quarterly) (last 12 periods)",
   "source_url": "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/teina230?lastTimePeriod=12",
-  "updated_at": "2025-12-05T11:07:08.484913+00:00",
+  "updated_at": "2025-12-06T04:33:37.730353+00:00",
   "unit": "% of GDP",
   "latest_period": "2025-Q2",
   "records": [

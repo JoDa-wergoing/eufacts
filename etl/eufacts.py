@@ -16,7 +16,6 @@ Voor elke dataset wordt het volgende gedaan:
   data/timeseries/YYYY-MM-DD/<dataset>.json         (timeseries snapshot)
   data/latest/<dataset>.json                        (latest alias - cross-section)
   data/latest/<dataset>-timeseries.json             (latest alias - timeseries)
-  data/latest/<dataset>_timeseries.json             (compat underscore alias)
 
 Daarnaast:
 - data/latest/manifest.json bevat metadata over alle datasets.
@@ -54,22 +53,23 @@ DATASETS = [
     },
     {
         "id": "gov_10a_taxag",
-        "url": (
+        "description": "Total receipts from taxes and social contributions (% of GDP, general government, annual)",
+        "last_time_periods": 5,
+                "url": (
         f"{BASE_URL}/gov_10a_taxag"
         "?freq=A"
         "&unit=PC_GDP"
         "&sector=S13"
-        "&lastTimePeriod=12"
+        "&na_item=D2_D5_D91_D61_M_D612_M_D614_M_D995"
+        "&lastTimePeriod=5"
         ),
-        "description": "Total receipts from taxes and social contributions (% of GDP, general government, annual)",
-        "last_time_periods": 10,
         "notes_latest": [
-            "Eurostat 1.0 API; last 10 years retrieved and reduced to latest year in ETL.",
+            "Eurostat 1.0 API; last 5 years retrieved and reduced to latest year in ETL.",
             "Values represent general government revenue from taxes and social contributions.",
             "Figures may be revised by Eurostat; check source for metadata.",
         ],
         "notes_timeseries": [
-            "Eurostat 1.0 API; last 10 years as returned by API.",
+            "Eurostat 1.0 API; last 5 years as returned by API.",
             "Series sorted by time ascending per country.",
         ],
     },
@@ -292,8 +292,10 @@ def process_dataset(dataset_cfg: Dict[str, Any]) -> Dict[str, Any]:
     dataset_id = dataset_cfg["id"]
     last_n = dataset_cfg["last_time_periods"]
 
-    eurostat_url = f"{BASE_URL}/{dataset_id}?lastTimePeriod={last_n}"
-
+    if "url" in dataset_cfg:
+        eurostat_url = dataset_cfg["url"]
+    else:
+        eurostat_url = f"{BASE_URL}/{dataset_id}?lastTimePeriod={last_n}"
     log.info("=== Processing dataset %s (lastTimePeriod=%s) ===", dataset_id, last_n)
 
     # 1) Fetch
@@ -330,7 +332,6 @@ def process_dataset(dataset_cfg: Dict[str, Any]) -> Dict[str, Any]:
 
     latest_cross = LATEST_DIR / f"{dataset_id}.json"
     latest_ts_hyphen = LATEST_DIR / f"{dataset_id}-timeseries.json"
-    latest_ts_unders = LATEST_DIR / f"{dataset_id}_timeseries.json"
 
     # 5) Write snapshots
     write_json(snap_path, latest_obj)
@@ -340,7 +341,6 @@ def process_dataset(dataset_cfg: Dict[str, Any]) -> Dict[str, Any]:
     LATEST_DIR.mkdir(parents=True, exist_ok=True)
     write_json(latest_cross, latest_obj)
     write_json(latest_ts_hyphen, ts_obj)
-    write_json(latest_ts_unders, ts_obj)
 
     # 7) Hashes (nice-to-have)
     try:
@@ -360,7 +360,6 @@ def process_dataset(dataset_cfg: Dict[str, Any]) -> Dict[str, Any]:
         "latest_files": {
             "cross_section": str(latest_cross.relative_to(OUT_DIR)),
             "timeseries_hyphen": str(latest_ts_hyphen.relative_to(OUT_DIR)),
-            "timeseries_underscore": str(latest_ts_unders.relative_to(OUT_DIR)),
         },
         "hashes": {
             "snapshot": hash_snap,

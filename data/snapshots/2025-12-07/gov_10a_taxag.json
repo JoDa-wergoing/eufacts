@@ -1,0 +1,213 @@
+{
+  "dataset": "GOV_10A_TAXAG",
+  "description": "Total receipts from taxes and social contributions (% of GDP, general government, annual) (latest period)",
+  "source_url": "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/gov_10a_taxag?freq=A&unit=PC_GDP&sector=S13&na_item=D2_D5_D91_D61_M_D612_M_D614_M_D995&lastTimePeriod=5",
+  "updated_at": "2025-12-07T05:38:19.238531+00:00",
+  "latest_period": "2024",
+  "unit": "% of GDP",
+  "records": [
+    {
+      "country_code": "DK",
+      "country": "Denmark",
+      "time": "2024",
+      "value_pct_gdp": 45.6
+    },
+    {
+      "country_code": "AT",
+      "country": "Austria",
+      "time": "2024",
+      "value_pct_gdp": 43.4
+    },
+    {
+      "country_code": "FR",
+      "country": "France",
+      "time": "2024",
+      "value_pct_gdp": 43.4
+    },
+    {
+      "country_code": "BE",
+      "country": "Belgium",
+      "time": "2024",
+      "value_pct_gdp": 42.3
+    },
+    {
+      "country_code": "IT",
+      "country": "Italy",
+      "time": "2024",
+      "value_pct_gdp": 42.3
+    },
+    {
+      "country_code": "FI",
+      "country": "Finland",
+      "time": "2024",
+      "value_pct_gdp": 42.2
+    },
+    {
+      "country_code": "SE",
+      "country": "Sweden",
+      "time": "2024",
+      "value_pct_gdp": 42.1
+    },
+    {
+      "country_code": "LU",
+      "country": "Luxembourg",
+      "time": "2024",
+      "value_pct_gdp": 41.4
+    },
+    {
+      "country_code": "NO",
+      "country": "Norway",
+      "time": "2024",
+      "value_pct_gdp": 40.2
+    },
+    {
+      "country_code": "EL",
+      "country": "Greece",
+      "time": "2024",
+      "value_pct_gdp": 39.9
+    },
+    {
+      "country_code": "EA19",
+      "country": "Euro area - 19 countries  (2015-2022)",
+      "time": "2024",
+      "value_pct_gdp": 39.8
+    },
+    {
+      "country_code": "EA20",
+      "country": "Euro area – 20 countries (from 2023)",
+      "time": "2024",
+      "value_pct_gdp": 39.7
+    },
+    {
+      "country_code": "DE",
+      "country": "Germany",
+      "time": "2024",
+      "value_pct_gdp": 39.6
+    },
+    {
+      "country_code": "EU27_2020",
+      "country": "European Union - 27 countries (from 2020)",
+      "time": "2024",
+      "value_pct_gdp": 39.4
+    },
+    {
+      "country_code": "NL",
+      "country": "Netherlands",
+      "time": "2024",
+      "value_pct_gdp": 38.6
+    },
+    {
+      "country_code": "HR",
+      "country": "Croatia",
+      "time": "2024",
+      "value_pct_gdp": 38.5
+    },
+    {
+      "country_code": "SI",
+      "country": "Slovenia",
+      "time": "2024",
+      "value_pct_gdp": 38.3
+    },
+    {
+      "country_code": "IS",
+      "country": "Iceland",
+      "time": "2024",
+      "value_pct_gdp": 36.9
+    },
+    {
+      "country_code": "ES",
+      "country": "Spain",
+      "time": "2024",
+      "value_pct_gdp": 36.7
+    },
+    {
+      "country_code": "PL",
+      "country": "Poland",
+      "time": "2024",
+      "value_pct_gdp": 36.4
+    },
+    {
+      "country_code": "CY",
+      "country": "Cyprus",
+      "time": "2024",
+      "value_pct_gdp": 36.1
+    },
+    {
+      "country_code": "SK",
+      "country": "Slovakia",
+      "time": "2024",
+      "value_pct_gdp": 35.4
+    },
+    {
+      "country_code": "EE",
+      "country": "Estonia",
+      "time": "2024",
+      "value_pct_gdp": 35.1
+    },
+    {
+      "country_code": "HU",
+      "country": "Hungary",
+      "time": "2024",
+      "value_pct_gdp": 35.1
+    },
+    {
+      "country_code": "PT",
+      "country": "Portugal",
+      "time": "2024",
+      "value_pct_gdp": 35.1
+    },
+    {
+      "country_code": "CZ",
+      "country": "Czechia",
+      "time": "2024",
+      "value_pct_gdp": 34.9
+    },
+    {
+      "country_code": "LV",
+      "country": "Latvia",
+      "time": "2024",
+      "value_pct_gdp": 34.7
+    },
+    {
+      "country_code": "LT",
+      "country": "Lithuania",
+      "time": "2024",
+      "value_pct_gdp": 32.8
+    },
+    {
+      "country_code": "BG",
+      "country": "Bulgaria",
+      "time": "2024",
+      "value_pct_gdp": 30.3
+    },
+    {
+      "country_code": "MT",
+      "country": "Malta",
+      "time": "2024",
+      "value_pct_gdp": 28.8
+    },
+    {
+      "country_code": "RO",
+      "country": "Romania",
+      "time": "2024",
+      "value_pct_gdp": 27.9
+    },
+    {
+      "country_code": "CH",
+      "country": "Switzerland",
+      "time": "2024",
+      "value_pct_gdp": 27.7
+    },
+    {
+      "country_code": "IE",
+      "country": "Ireland",
+      "time": "2024",
+      "value_pct_gdp": 21.6
+    }
+  ],
+  "notes": [
+    "Eurostat 1.0 API; last 5 years retrieved and reduced to latest year in ETL.",
+    "Values represent general government revenue from taxes and social contributions.",
+    "Figures may be revised by Eurostat; check source for metadata."
+  ]
+}

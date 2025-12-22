@@ -1,40 +1,40 @@
 {
   "datasets": {
     "teina230": {
-      "updated_at": "2025-12-21T15:18:30.233877+00:00",
+      "updated_at": "2025-12-22T15:21:58.715628+00:00",
       "latest_period": "2025-Q2",
       "unit": "% of GDP",
-      "latest_snapshot": "snapshots/2025-12-21/teina230.json",
-      "latest_timeseries": "timeseries/2025-12-21/teina230.json",
+      "latest_snapshot": "snapshots/2025-12-22/teina230.json",
+      "latest_timeseries": "timeseries/2025-12-22/teina230.json",
       "latest_files": {
         "cross_section": "latest/teina230.json",
         "timeseries_hyphen": "latest/teina230-timeseries.json"
       },
       "hashes": {
-        "snapshot": "sha256:d8cdd3ea959adaf529380055bf4991eff66c0e21b8916d93bacd53ec77eb94f1",
-        "timeseries": "sha256:34d9c7be0163e7c8e0cf7e8f34f14fe5e2fa08bf7b10c7a0ceae51afd317ca87",
-        "latest_cross": "sha256:d8cdd3ea959adaf529380055bf4991eff66c0e21b8916d93bacd53ec77eb94f1",
-        "latest_timeseries": "sha256:34d9c7be0163e7c8e0cf7e8f34f14fe5e2fa08bf7b10c7a0ceae51afd317ca87"
+        "snapshot": "sha256:c8ccf39862bb117b001a618153aec04d157ef6b1b32b194306d990096e791308",
+        "timeseries": "sha256:636df39037aae57e84bbc9831928fb5b2697ad07b3d561bbb6c2856a9ba2959c",
+        "latest_cross": "sha256:c8ccf39862bb117b001a618153aec04d157ef6b1b32b194306d990096e791308",
+        "latest_timeseries": "sha256:636df39037aae57e84bbc9831928fb5b2697ad07b3d561bbb6c2856a9ba2959c"
       },
       "source_url": "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/teina230?lastTimePeriod=12",
       "record_count_latest": 30,
       "record_count_timeseries": 360
     },
     "gov_10a_taxag": {
-      "updated_at": "2025-12-21T15:18:30.564147+00:00",
+      "updated_at": "2025-12-22T15:21:59.923376+00:00",
       "latest_period": "2024",
       "unit": "% of GDP",
-      "latest_snapshot": "snapshots/2025-12-21/gov_10a_taxag.json",
-      "latest_timeseries": "timeseries/2025-12-21/gov_10a_taxag.json",
+      "latest_snapshot": "snapshots/2025-12-22/gov_10a_taxag.json",
+      "latest_timeseries": "timeseries/2025-12-22/gov_10a_taxag.json",
       "latest_files": {
         "cross_section": "latest/gov_10a_taxag.json",
         "timeseries_hyphen": "latest/gov_10a_taxag-timeseries.json"
       },
       "hashes": {
-        "snapshot": "sha256:1908368434c9cf868433d258198c7ca962a61946bdf80a48e38b508195bb7cab",
-        "timeseries": "sha256:7ffb9fa014afb78da38570309ff9af7548e9ce53ac86025b2a36a06276eefa58",
-        "latest_cross": "sha256:1908368434c9cf868433d258198c7ca962a61946bdf80a48e38b508195bb7cab",
-        "latest_timeseries": "sha256:7ffb9fa014afb78da38570309ff9af7548e9ce53ac86025b2a36a06276eefa58"
+        "snapshot": "sha256:4841ac13a5db6c04948ef6a9c4b996fe1265369ac5e2e071ddf1cb306dd61a72",
+        "timeseries": "sha256:aef6f0e48617fbbd60e0a02ea6225381c85ed32f92f9f7171e1ab606b9f306a2",
+        "latest_cross": "sha256:4841ac13a5db6c04948ef6a9c4b996fe1265369ac5e2e071ddf1cb306dd61a72",
+        "latest_timeseries": "sha256:aef6f0e48617fbbd60e0a02ea6225381c85ed32f92f9f7171e1ab606b9f306a2"
       },
       "source_url": "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/gov_10a_taxag?freq=A&unit=PC_GDP&sector=S13&na_item=D2_D5_D91_D61_M_D612_M_D614_M_D995&lastTimePeriod=5",
       "record_count_latest": 33,
